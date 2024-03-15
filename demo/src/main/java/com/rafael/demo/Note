@@ -1,0 +1,17 @@
+CommandLineRunner faz com que codigo seja feito polo comando no terminal não precisando testa
+na web etc
+
+
+A interface CommandLineRunner é um recurso poderoso dentro do universo do Spring Framework,
+amplamente utilizado no desenvolvimento de aplicações Java. Ela permite que executemos alguma
+ação logo após a inicialização de nossa aplicação. Pode ser muito útil, por exemplo, se quisermos
+carregar alguns dados em nosso banco de dados logo na inicialização de nossa aplicação.
+
+Como funciona?
+Quando uma aplicação Spring Boot é lançada pode ocorrer várias operações automáticas, como
+a criação de beans, configuração de banco de dados entre outros. A abertura para customização
+destas operações é limitada, e é aqui que a interface CommandLineRunner entra em cena.
+
+A interface CommandLineRunner representa uma tarefa a ser executada após a inicialização do
+Spring Boot, ou seja, permite definir código para ser executado automaticamente quando o
+aplicativo é iniciado.
