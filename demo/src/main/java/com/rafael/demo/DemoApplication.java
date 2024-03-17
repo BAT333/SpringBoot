@@ -1,6 +1,9 @@
 package com.rafael.demo;
 
+import com.rafael.demo.Class.Master;
+import com.rafael.demo.model.DataComplementary;
 import com.rafael.demo.model.DataSeries;
+import com.rafael.demo.model.DataInformation;
 import com.rafael.demo.service.APIconsumption;
 import com.rafael.demo.service.Converter;
 import org.springframework.boot.CommandLineRunner;
@@ -17,9 +20,7 @@ public class DemoApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 
-		System.out.println(new APIconsumption().getData("https://viacep.com.br/ws/08460-367/json/"));
-		Converter converter = new Converter();
-		DataSeries series =converter.dataConverter(new APIconsumption().getData("https://viacep.com.br/ws/08460-367/json/"), DataSeries.class);
-		System.out.println(series);
+		Master master = new Master();
+		master.menu();
 	}
 }
