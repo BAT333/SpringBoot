@@ -23,7 +23,6 @@ public class Master {
         System.out.println(series);
         System.out.println(information);
         System.out.println(complementary);
-
     }
 
 }
