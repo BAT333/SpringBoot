@@ -1,20 +1,17 @@
 package com.rafael.demo;
 
 
-import com.rafael.demo.Car.Class.Master;
-import com.rafael.demo.Car.model.Model;
-import com.rafael.demo.Car.model.Models;
-import com.rafael.demo.Car.model.Years;
-import com.rafael.demo.Car.service.APIConsumptiom;
-import com.rafael.demo.Car.service.Converter;
+import com.rafael.demo.persistenciaJava.Class.Master;
+import com.rafael.demo.persistenciaJava.repository.VehiclesRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.util.*;
-
 @SpringBootApplication
 public class DemoApplication implements CommandLineRunner {
+	@Autowired
+	private VehiclesRepository repository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(DemoApplication.class, args);
@@ -22,9 +19,11 @@ public class DemoApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-        Master master = new Master();
+		Master master = new Master(repository);
+		master.menu();
+        /*  Master master = new Master();
         master.menu();
-        /*
+
 		Master master = new Master();
 		master.menu();
 

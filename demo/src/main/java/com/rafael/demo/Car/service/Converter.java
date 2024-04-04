@@ -3,12 +3,10 @@ package com.rafael.demo.Car.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
-
-import java.util.Collection;
 import java.util.List;
 
 public class Converter implements IConverter{
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
     @Override
     public <T> T converter(String json, Class<T> t) {
         try {
