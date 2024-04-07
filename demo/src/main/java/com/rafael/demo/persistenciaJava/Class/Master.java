@@ -1,100 +1,95 @@
 package com.rafael.demo.persistenciaJava.Class;
 
-import com.rafael.demo.persistenciaJava.model.*;
-import com.rafael.demo.persistenciaJava.repository.VehiclesRepository;
-import com.rafael.demo.persistenciaJava.service.Converting;
-import com.rafael.demo.persistenciaJava.service.SearchingAPI;
+import com.rafael.demo.persistenciaJava.model.Priority;
+import com.rafael.demo.persistenciaJava.repository.ProjectRepository;
+import com.rafael.demo.persistenciaJava.repository.TaskRepository;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDate;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class Master {
-    private final SearchingAPI  api = new SearchingAPI();
-    private final Converting converting = new Converting();
-    private final Scanner key = new Scanner(System.in);
-    private VehiclesRepository repository;
+    private ProjectRepository projectRepository;
+    private TaskRepository taskRepository;
+    private Scanner key = new Scanner(System.in);
 
-    public Master(VehiclesRepository repository) {
-        this.repository = repository;
+    public Master(ProjectRepository projectRepository,TaskRepository taskRepository){
+        this.projectRepository=projectRepository;
+        this.taskRepository= taskRepository;
     }
-
+    public Master(){}
 
     public void menu(){
         int num = -1;
-        while (num !=0){
+        while (num!=0) {
             System.out.println("""
-                    1- PESQUISA DE TABELA DE CARRO
-                    2- COMPRA VEICULO
-                    3- SAIR\s""");
-            int nums = key.nextInt();
-            switch (nums){
-                case 1:
-                   // this.search().stream().map(Vehicles::new).forEach(v->repository.save(v));
-                    this.repository.findAll().forEach(System.out::println);
-                    break;
-                case 2:
-                    System.out.println("NUMERO 2");
-                    break;
-                case 3:
-                    num = 0;
-                    break;
-            }
-
+                    1-Cadastrar projetos:
+                    2-Cadastrar tarefas:
+                    3-Listar projetos:
+                    4-Listar tarefas por projeto:
+                    5-Buscar tarefas por prioridade:
+                    0-SAIR\s
+                    """);
+            System.out.println("WHAT DO YOU WANT TO DO TODAY?");
+            num = key.nextInt();
+            this.willDo(num);
 
         }
 
     }
 
-    private List<Vehicle> search() {
-        System.out.println("""
-                    1- CARRO
-                    2- MOTO
-                    3- CAMINHOES\s""");
-        int nums = key.nextInt();
-        String type = switch (nums) {
-            case 1 -> {
-                System.out.println("CARROS");
-                yield "carros";
-            }
-            case 2 -> {
-                System.out.println("MOTO");
-                yield "motos";
-            }
-            case 3 -> {
-                System.out.println("CAMINHOES");
-                yield "caminhoes";
-            }
-            default -> null;
-        };
-        return this.mark(type);
-    }
+    private void willDo(int num) {
+        switch (num){
+            case 1:
+                this.registerProject(this.projectRepository);
+                break;
+            case 2:
+                this.registerTask(this.taskRepository,this.projectRepository);
+                break;
+            case 3:
+                this.listProjects(this.projectRepository);
+                break;
+            case 4:
+                this.listTaskProjects(this.projectRepository);
+                break;
+            case 5:
+                this.listTaskPriority(this.taskRepository);
+                break;
+            case 0:
+                System.out.println("SAINDO.........");
+                break;
+            default:
+                throw new RuntimeException("Invalid option");
 
-    private List<Vehicle> mark(String type) {
-        converting.convertingListAPI(api.getDate("https://parallelum.com.br/fipe/api/v1/"+type+"/marcas"), Model.class).forEach(System.out::println);
-        System.out.println("DIGITE CODIGO DA PESQUISA");
-        String num = key.next();
-        api.getDate("https://parallelum.com.br/fipe/api/v1/"+type+"/marcas/"+num+"/modelos");
-        return this.models(num,type);
-    }
-
-    private List<Vehicle> models(String num, String type) {
-        converting.convertingAPI(api.getDate("https://parallelum.com.br/fipe/api/v1/"+type+"/marcas/"+num+"/modelos"), Models.class).models().forEach(System.out::println);
-        System.out.println("DIGITE CODIGO DA PESQUISA");
-        String model = key.next();
-        return this.vehicle(num,type,model);
-    }
-    private Vehicle year(String type, String mark, String model, String year) {
-        String json4 = api.getDate("https://parallelum.com.br/fipe/api/v1/"+type.toLowerCase()+"/marcas/"+mark+"/modelos/"+model+"/anos/"+year);
-        return converting.convertingAPI(json4,Vehicle.class);
-    }
-
-    private List<Vehicle> vehicle(String num, String type, String model) {
-        List<Vehicle> vehicles = new ArrayList<>();
-        List<Years>  years  = converting.convertingListAPI(api.getDate("https://parallelum.com.br/fipe/api/v1/"+type.toLowerCase()+"/marcas/"+num+"/modelos/"+model+"/anos"), Years.class);
-        for (Years year: years){
-            vehicles.add( this.year(type,num,model,year.code()));
         }
-        return vehicles;
+    }
+
+    private void listTaskPriority(TaskRepository taskRepository) {
+        taskRepository.findByPriority(Priority.HIGH).forEach(System.out::println);
+    }
+
+    private void listTaskProjects(ProjectRepository projectRepository) {
+        projectRepository.findAll().forEach(s-> System.out.println("NAME PROJECTS: "+s.getName()+" TASKS: "+s.getTasks()));
+    }
+
+    private void listProjects(ProjectRepository projectRepository) {
+        projectRepository.findAll().forEach(System.out::println);
+    }
+
+    private void registerTask(TaskRepository taskRepository, ProjectRepository projectRepository) {
+        this.listProjects(projectRepository);
+        System.out.println("NAME PROJECT");
+        Optional<Project> project= projectRepository.findByNameContainingIgnoreCase(key.next());
+        project.ifPresent(p->taskRepository.save(new Task("CRIADO","SLA",LocalDate.now(), Priority.HIGH,false,p)));
+        System.out.println("Task registered successfully");
+    }
+
+    private void registerProject(ProjectRepository projectRepository) {
+        System.out.println("PROJECT NAME ?");
+        String name= key.next();
+        System.out.println("Project description");
+        String description = key.nextLine();
+        projectRepository.save(new Project(name,description, LocalDate.now()));
+        System.out.println("Project registered successfully");
     }
 }

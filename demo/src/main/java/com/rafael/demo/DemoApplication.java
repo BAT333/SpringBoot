@@ -2,7 +2,8 @@ package com.rafael.demo;
 
 
 import com.rafael.demo.persistenciaJava.Class.Master;
-import com.rafael.demo.persistenciaJava.repository.VehiclesRepository;
+import com.rafael.demo.persistenciaJava.repository.ProjectRepository;
+import com.rafael.demo.persistenciaJava.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -11,7 +12,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class DemoApplication implements CommandLineRunner {
 	@Autowired
-	private VehiclesRepository repository;
+	private ProjectRepository repository;
+	@Autowired
+	private TaskRepository taskRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(DemoApplication.class, args);
@@ -19,7 +22,7 @@ public class DemoApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		Master master = new Master(repository);
+		Master master = new Master(repository,taskRepository);
 		master.menu();
         /*  Master master = new Master();
         master.menu();

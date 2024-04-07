@@ -64,7 +64,15 @@ A anotação @JoinColumn é usada para especificar a coluna que será usada para
 @ManyToOne
 @JoinColumn(name = "autor_id")
 private Autor autor;
+=================================================
+  @OneToMany(mappedBy = "vehicles") ---> aqui para como esta mapeado na outra class que no caso é veiculo
+    private List<Client> clients;
+    ----------------------------------
+    aqui visão que tem outra parte da class
 
+@ManyToOne -> muitos para um
+ @JoinColumn(name= "id_veiculo") -> name que vc deu para ele
+    private Vehicles vehicles -> esse nome aqui vc tem usar para mappedBy;
 ======================================
 @JoinTable
 A anotação @JoinTable é usada para mapear tabelas de junção em relacionamentos muitos-para-muitos. Ela especifica a tabela intermediária que liga duas entidades.
@@ -91,9 +99,31 @@ A anotação @Cascade é usada para especificar o comportamento de cascata das o
 @OneToMany(mappedBy = "departamento")
 @Cascade(CascadeType.SAVE_UPDATE)
 private List<Funcionario> funcionarios;
+__________________________________________________
+  @OneToMany(mappedBy = "vehicles",cascade = CascadeType.ALL)
+  List<Dono> Donos;
+
+Imagine que temos duas entidades: Post e Comment. Um Post pode ter muitos Comments. Se excluirmos um Post, o que acontecerá com os Comments relacionados a ele? Os tipos de cascata têm o objetivo de responder a este tipo de questões.
+
+PERSIST : se você persistir a entidade Post, os Comments relacionados também serão persistidos.
+MERGE : se você mesclar os detalhes de um Post, os Comments relacionados também serão mesclados.
+REMOVE : se você remover um Post, os Comments relacionados também serão removidos.
+REFRESH : se você atualizar o Post, também atualizará os Comments relacionados.
+DETACH : se um Post foi desanexado, todos os Comments relacionados serão desanexados também.
+ALL : se você executar qualquer uma das operações acima em um Post, essa operação será propagada para todos os Comments relacionados.
+
+
+
+-----------------------------------------------------------------------------------
+fetch = FetchType.EAGER
+De modo bem simples, Fetch Type define qual a estratégia será utilizada para carregar os dados do banco para sua aplicação.
+
+
 =============================================
 @Embeddable e @Embedded
 Essas anotações são usadas para representar tipos incorporados (embeddable types) que podem ser usados como componentes em entidades.
+Lazy, em inglês, significa preguiçoso.
+Eager, em inglês, pode ser traduzido como ansioso
 
 @Embeddable
 public class Endereco { ... }
@@ -113,7 +143,7 @@ public class Cliente {
 
 https://hibernate.org/orm/documentation/6.3/ -> documentação do hibernete
 https://docs.jboss.org/hibernate/stable/annotations/reference/en/html/ -> documentação de anotação
-
+https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html
 
 
 
@@ -153,3 +183,146 @@ ESSA NO HIBERNETE
 CRIA VARIAVEL DE AMBIENTE PARA FAZER UMA PESQUISA NO WIN E CRIAR PARA USAR SO USAR ${NOME DA VARIAVEL}
 OU USAR
 System.getenv(NOME DA VARIAVEL);
+================================
+PESQUISA POR QUERY
+ex
+@Query(value = "SELECT sum(compra.valor) as valores FROM compra where compra.Numero_cartao = ?1",nativeQuery = true)
+    BigDecimal getValores(Long numberCard);
+
+verbo introdutório + palavra-chave “By” + critérios de busca
+Como verbos introdutórios, temos find, read, query, count e get. Já os
+EXEMPLO DE PESQUISA
+findByTituloContainingIgnoreCase()
+
+Palavras relativas à igualdade:
+
+Is, para ver igualdades
+Equals, para ver igualdades (essa palavra-chave e a anterior têm os mesmos princípios, e são mais utilizadas para a legibilidade do método).
+IsNot, para checar desigualdades
+IsNull, para verificar se um parâmetro é nulo
+Palavras relativas à similaridade:
+
+Containing, para palavras que contenham um trecho
+StartingWith, para palavras que comecem com um trecho
+EndingWith, para palavras que terminem com um trecho
+Essas palavras podem ser concatenadas com outras condições, como o ContainingIgnoreCase, para não termos problemas de Case Sensitive.
+Palavras relacionadas à comparação:
+
+LessThan, para buscar registros menores que um valor
+LessThanEqual, para buscar registros menores ou iguais a um valor
+GreaterThan, para identificar registros maiores que um valor
+GreaterThanEqual, para identificar registros maiores ou iguais a um valor
+Between, para saber quais registros estão entre dois valores
+DEPOIS DO AND OU DEPOIS DE ALGUNS METODOS TEM USAR LETRA MAIUSCULA
+  List<Vehicles> findBycodeFipeAndMark(String next, String ano);
+  BUSCANDO POR TOP 5 SERIES OrderBy por avaiação
+  Top como o limit do mysql
+  findTop5ByOrderByAvaliacaoDesc()
+  Distinct, para remover dados duplicados
+  First, para pegar o primeiro registro
+  Top, para limitar o número de dados
+
+
+  //Por enum
+  findByNomedoenum(Enum.Constante)
+
+========================================================================
+PESQUISA E EXEMPLO JPA
+findByNomeContainingIgnoreCase(String nome);
+procura por nome que contem e Ignora maiuscula ou minuscula
+
+SEMPRE TEM QUE TER findBy-> PROCURA POR
+find, read, query, count e get -> tem essas palavras que pode substituir o find
+PELO OQUE VC VAI PROCURA -> Nome
+
+E SE TEM OUTRO METODO -> ContainingIgnoreCase
+
+pode ter N metodos, então procura aqui oq pode ou não usar
+https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html
+
+---------------------------------------------------------------------------
+
+findByAtoresContainIgnoreCaseAndAvaliacaoGreaterThanEqual(String nomeAtor, double avaliacao)
+And -> significa para pesquisar por uma coisa E outra coisa, retorno desta pesquisa as duas coisas tem ser true
+GreaterThan -> para identificar registros maiores que um valor
+------------------------------------------------------------------------------------
+findTop5ByOrderByAvaliacaoDesc()
+
+Top5 ->  limitar a pesquisa nos top 5
+
+Distinct, para remover dados duplicados
+
+First, para pegar o primeiro registro
+
+Top, para limitar o número de dados
+
+OrderBy-> ordenar por algo
+
+Desc -> mostra em ordem decrecente
+-----------------------------------------------------------------------------------------
+BUSCANDO POR ENUM
+findByGenero(Enum de genero)
+----------------------------------------------------------------------------------------
+PESQUISA JPQL
+@query(velue = SELECT * FROM CLIENTES WHERE CLIENTES.NOME = ?1 AND CLIENTES.IDADE >= ?2,nativeQuery = true)
+List<Clientes> clientes(String name, int idade);
+
+query -> PARA PESQUISAR NO BANCO DE DADOS ESCREVENDO COMO VC QUER ESSE SELECT FEITO POR ANOTAÇÃO
+
+
+ ?1 -> AQUI MOSTRA COMO VC QUER PASSA PARAMETRO, SE VC COLOCAR PARAMETRO 1 COMO NOME PRIMEIRO PARAMETRO NO SEU METODO
+ TBM TEM SER NOME
+
+
+ ?2 ->  AQUI PARAMETRO 2
+ VC PODE TER N PARAMETRO SO TEM IR ESPECIFICANDO COM NUMERO
+
+
+ nativeQuery--> AQUI PARA PESQUISAR NATIVA, POR EXEMPLO SE VC ULTILIZAR ISSO COM TRUE, VC ESTA FAZENDO PESQUISA
+ COMO FOSSE NO SEU BANCO DE DADOS NATIVO MEU MYSQL NÃO DA MESMA FOR
+
+-----------------------------------------------------------------------------------
+PESQUISANDO NA FORMA DO JPQL -> POUCO DA DESVANTAGEM É PERCA DE PERFORMACE
+@query(SELECT c FROM Cliente c WHERE c.NOME = ?1 AND c.IDADE >= ?2)
+List<Clientes> clientes(String name, int idade);
+
+C -> REPRESENTAÇÃO DA ENTIDADE Cliente, que é class cliente no java
+Cliente c -> Falando que c -> representa entidade cliente
+ c.NOME-> AQUI MOSTRANDO OS ATRIBUTOS QUE VC QUER PERGAR ETC
+
+
+
+
+@query(SELECT c FROM Cliente c WHERE c.NOME = :name AND c.IDADE >= :idade)
+List<Clientes> clientes(String name, int idade);
+
+DIFERENTES FORMA DE PESQUISA PODE SER COMO EXEMPLO A CIMA COM PARAMETRO E INTERROGÇÃO
+OU COM DOIS PONTOS : E NOME DO PARAMETRO  :name
+---------------------------------------------------------------
+SELECT livro FROM Livro livro WHERE LOWER(livro.titulo) = LOWER(:titulo)
+AQUI PARA NÃO TER DIFERENÇA DE LETRA MAIUSCULA OU MINUSCULA
+
+
+JOIN
+
+@Query("SELECT e FROM Serie s JOIN s.episodios e WHERE s = :serie ORDER BY avaliacao DESC LIMIT 5")
+
+
+
+
+======================================================================
+Segurança------
+application.properties:
+
+${DB_USER}
+
+System.getenv("OPENAI_APIKEY")
+
+
+
+
+
+
+
+
+
