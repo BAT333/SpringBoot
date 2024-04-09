@@ -1,4 +1,4 @@
-package com.rafael.demo.model;
+package com.rafael.demo.lambda.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

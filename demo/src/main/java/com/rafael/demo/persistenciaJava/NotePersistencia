@@ -1,21 +1,3 @@
-CommandLineRunner faz com que codigo seja feito polo comando no terminal não precisando testa
-na web etc
-
-
-A interface CommandLineRunner é um recurso poderoso dentro do universo do Spring Framework,
-amplamente utilizado no desenvolvimento de aplicações Java. Ela permite que executemos alguma
-ação logo após a inicialização de nossa aplicação. Pode ser muito útil, por exemplo, se quisermos
-carregar alguns dados em nosso banco de dados logo na inicialização de nossa aplicação.
-
-Como funciona?
-Quando uma aplicação Spring Boot é lançada pode ocorrer várias operações automáticas, como
-a criação de beans, configuração de banco de dados entre outros. A abertura para customização
-destas operações é limitada, e é aqui que a interface CommandLineRunner entra em cena.
-
-A interface CommandLineRunner representa uma tarefa a ser executada após a inicialização do
-Spring Boot, ou seja, permite definir código para ser executado automaticamente quando o
-aplicativo é iniciado.
-
 Application.properties
 
 
@@ -32,7 +14,7 @@ hibernate.dialect = org.hibernate.dialect.MySQL8Dialect
 spring.jackson.date-format=yyyy-MM-dd HH:mm:ss
 spring.jackson.time-zone=Brazil/East
 
-
+PARA MARCAÇÃO NA CLASS JAVA
 
 @Entity para definir está classe como uma entidade do banco de dados.
 @Table Por padrão, o Hibernate usa o nome da classe como o nome da tabela no banco de dados, fazendo apenas a conversão de padrão de nomenclatura do PascalCase para o SnakeCase
@@ -320,87 +302,3 @@ ${DB_USER}
 System.getenv("OPENAI_APIKEY")
 
 =======================================================================================================================
-API WEB
-application.properties:
-server.port=8081
-MUDA A PORTA DE ENTRADA
---------------------------------------------------------------------------------------
-GET para obter dados,
-POST para enviar novos dados,
-PUT para atualizar dados existentes,
-DELETE para remover dados.
-----------------------------------------------
-@RestController -> A anotação @RestController indica para o framework que se trata de um controlador Rest,
-voltado para o desenvolvimento de aplicações web Restful e facilita que nós lidemos com requisições web
-(POST, GET, PUT, etc) pois une o Controller a um ResponseBody para todos métodos marcados pelo RequestMapping
-
-
-@RequestMapping é uma anotação de nível de classe que define o prefixo de URL para todas as rotas de um
-controller. @GetMapping define uma rota que responde a requisições HTTP GET.
-
-
----------------------------------------------------
- @Controller é criar um Map do model object e encontrar uma view, mas o @RestController
- simplesmente retorna o objeto e os dados do objeto são gravados diretamente na resposta
- HTTP como JSON ou XML.
-
- O @Controller é uma anotação comum usada para marcar uma classe como Spring MVC Controller,
- enquanto o @RestController é um controlador especial usado para serviços RESTFul e o equivalente a
- @Controller + @ResponseBody.
--------------------------------------------------------------------------------------------------------------------
-@CrossOrigin("*") -> Cross-Origin Resource Sharing ou CORS é um mecanismo que permite que recursos restritos
-em uma página da web sejam recuperados por outro domínio fora do domínio ao qual pertence o recurso que será
-recuperado
-pode qualquer um entra
-mas tem um modo de ser mais restrito
-----------------------------------------
-CorsConfiguration -> pasta
-CorsConfiguration.java ->
-package br.com.alura.screenmatch.config;
-
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-@Configuration
-public class CorsConfiguration implements WebMvcConfigurer {
-
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("http://127.0.0.1:5501")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "TRACE", "CONNECT");
-    }
-}
------------------------------------------------------------------------------------
-BASICAMENTE FALA QUE SO ESSA URL PODE ACESSAR O BACK E SO PODE FAZER ESSE TIPO DE MUDANÇAS QUE DEMOSTANDO ACiMA
-==============================================================================
-@Service
-ISSO DEMOSTRA PARA CONTROLADOR QUE ISSO CLASS DE SERVIÇO
-------------------------------------
-@Autowired
-private SerieService servico;
-BASICAMENTE VC DELEGA OUTRA CLASS PARA FAZER TODA PARTE LOGICA DE SERVIÇO
-____________________________________________________
-algumas das anotação
-@Controller: Usada para marcar uma classe como um controlador no padrão MVC (Model-View-Controller). Essa anotação é usada para receber requisições e manipular lógica de negócios.
-@RestController: Uma variação de @Controller, específica para APIs RESTful. Combina as anotações @Controller e @ResponseBody, indicando que cada método retorna um objeto serializado diretamente em JSON ou XML como resposta.
-@RequestMapping: Define mapeamentos entre URLs e métodos de controlador. Especifica as URLs para as quais um método do controlador deve responder e os métodos HTTP correspondentes (GET, POST, PUT, DELETE etc.).
-@GetMapping, @PostMapping, @PutMapping, @DeleteMapping: Atalhos para as operações HTTP GET, POST, PUT e DELETE, respectivamente, em métodos de controlador.
-@RequestParam: Usada para mapear os parâmetros de requisição HTTP para os parâmetros do método do controlador.
-------------------------------------------------------------------------------------------
-@PathVariable: Usada para vincular variáveis de template de URL a parâmetros de métodos de controlador.
-
-@GetMapping("/{id}")
-public SerieDTO obterPorId(@PathVariable Long id) {
------------------------------------------------------------------------------
-@RequestBody: Utilizada para mapear o corpo da requisição HTTP para um objeto de entrada do método do controlador.
-@ResponseBody: Indica que o valor retornado pelo método do controlador deve ser usado diretamente como corpo da resposta HTTP.
-@Valid e @Validated: Utilizadas para ativar a validação de entrada no lado do servidor. Geralmente combinadas com anotações de validação, como @NotNull, @Size, @Min, @Max, entre outras.
-@CrossOrigin: Utilizada para configurar permissões de acesso a recursos de diferentes origens (CORS - Cross-Origin Resource Sharing).
-
-
-
-
-
-

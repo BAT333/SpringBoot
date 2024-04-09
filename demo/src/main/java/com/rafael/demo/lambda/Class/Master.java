@@ -1,10 +1,10 @@
-package com.rafael.demo.Class;
+package com.rafael.demo.lambda.Class;
 
-import com.rafael.demo.model.DataComplementary;
-import com.rafael.demo.model.DataInformation;
-import com.rafael.demo.model.DataSeries;
-import com.rafael.demo.service.APIconsumption;
-import com.rafael.demo.service.Converter;
+import com.rafael.demo.lambda.model.DataComplementary;
+import com.rafael.demo.lambda.model.DataInformation;
+import com.rafael.demo.lambda.model.DataSeries;
+import com.rafael.demo.lambda.service.APIconsumption;
+import com.rafael.demo.lambda.service.Converter;
 
 import java.util.Scanner;
 

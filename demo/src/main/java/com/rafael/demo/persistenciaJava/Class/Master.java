@@ -28,6 +28,7 @@ public class Master {
                     3-Listar projetos:
                     4-Listar tarefas por projeto:
                     5-Buscar tarefas por prioridade:
+                    6-Tarefas Completa
                     0-SAIR\s
                     """);
             System.out.println("WHAT DO YOU WANT TO DO TODAY?");
@@ -55,6 +56,9 @@ public class Master {
             case 5:
                 this.listTaskPriority(this.taskRepository);
                 break;
+            case 6:
+                this.completedTask(this.taskRepository);
+                break;
             case 0:
                 System.out.println("SAINDO.........");
                 break;
@@ -62,6 +66,11 @@ public class Master {
                 throw new RuntimeException("Invalid option");
 
         }
+    }
+    private void completedTask(TaskRepository taskRepository){
+        Task task=  taskRepository.findById(1L).get();
+        task.setCompleted(true);
+        taskRepository.save(task);
     }
 
     private void listTaskPriority(TaskRepository taskRepository) {

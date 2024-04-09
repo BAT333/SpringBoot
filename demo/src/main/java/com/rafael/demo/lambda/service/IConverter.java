@@ -1,4 +1,4 @@
-package com.rafael.demo.service;
+package com.rafael.demo.lambda.service;
 
 public interface IConverter {
 

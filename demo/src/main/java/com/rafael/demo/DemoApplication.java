@@ -10,21 +10,19 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class DemoApplication implements CommandLineRunner {
-	@Autowired
-	private ProjectRepository repository;
-	@Autowired
-	private TaskRepository taskRepository;
+public class DemoApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(DemoApplication.class, args);
 	}
+/*
+
 
 	@Override
 	public void run(String... args) throws Exception {
 		Master master = new Master(repository,taskRepository);
 		master.menu();
-        /*  Master master = new Master();
+         Master master = new Master();
         master.menu();
 
 		Master master = new Master();
@@ -57,10 +55,10 @@ public class DemoApplication implements CommandLineRunner {
 
         }
 
-         */
 
 
-/*
+
+
 		System.out.println(apiConsumptiom.getData("https://parallelum.com.br/fipe/api/v1/carros/marcas/59/modelos"));
 		String json2 = apiConsumptiom.getData("https://parallelum.com.br/fipe/api/v1/carros/marcas/59/modelos");
 
@@ -89,4 +87,4 @@ public class DemoApplication implements CommandLineRunner {
 
 
 	}
-}
+

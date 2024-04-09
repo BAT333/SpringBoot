@@ -1,16 +1,17 @@
-package com.rafael.demo.Car.model;
+package com.rafael.demo.lambda.Car.model;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-
-public record Model(
-
+public record Mark(
         @JsonAlias("codigo")
         String code,
         @JsonAlias("nome")
-        String name
+        String year
 
-) {
+
+
+
+        ) {
 }
