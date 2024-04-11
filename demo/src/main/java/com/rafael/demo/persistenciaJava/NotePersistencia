@@ -302,3 +302,5 @@ ${DB_USER}
 System.getenv("OPENAI_APIKEY")
 
 =======================================================================================================================
+update de infos se tem que colocar ou save de novo ou apiweb coloca o @Transactional
+por que save serve como salvar no banco e upadate, mas para update tem chamar denovo aquela tal list

@@ -78,3 +78,7 @@ public SerieDTO obterPorId(@PathVariable Long id) {
 @ResponseBody: Indica que o valor retornado pelo método do controlador deve ser usado diretamente como corpo da resposta HTTP.
 @Valid e @Validated: Utilizadas para ativar a validação de entrada no lado do servidor. Geralmente combinadas com anotações de validação, como @NotNull, @Size, @Min, @Max, entre outras.
 @CrossOrigin: Utilizada para configurar permissões de acesso a recursos de diferentes origens (CORS - Cross-Origin Resource Sharing).
+
+
+______________________________________________________________________________________
+https://spring.io/projects/spring-boot
