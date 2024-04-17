@@ -78,7 +78,126 @@ public SerieDTO obterPorId(@PathVariable Long id) {
 @ResponseBody: Indica que o valor retornado pelo método do controlador deve ser usado diretamente como corpo da resposta HTTP.
 @Valid e @Validated: Utilizadas para ativar a validação de entrada no lado do servidor. Geralmente combinadas com anotações de validação, como @NotNull, @Size, @Min, @Max, entre outras.
 @CrossOrigin: Utilizada para configurar permissões de acesso a recursos de diferentes origens (CORS - Cross-Origin Resource Sharing).
-
-
 ______________________________________________________________________________________
+
+
+
+
+
+EX CLASS CONTROLLER
+@RequestMapping("/produtos")
+@RestController
+public class ProdutoController {
+
+    @GetMapping-> RETURN VALORES, PAGA VALOR RETORNA
+    public String produtosEmEstoque() {
+        return "Produtos em estoque...";
+    }
+}
+---------------------------------------------------------------------------------------------------
+RECEBER INFORMAÇÃO
+   @PostMapping -> AQUI PARA RECEBER INFORMAÇÃO, DIZENDO PARA QUE AQUI METODO QUE RECEBE IFNORMAÇÃO
+   @Transactional-> AQUI DIZ QUE NOS VAMOS TRABALHAR COM COISA DO BANCO INFORMAÇÃO ENTÃO SE FOR CADASTRA, UPATE, DELETA BOM US
+   Transalação ativa no banco de dados
+         public void cadastrar(@RequestBody String cep) {
+         @RequestBody-> AQUI DIZ QUE TEM UMA REQUISÃO FEITA, E TA PEGANDO ESSA REQUISÃO
+         E MANDANDO INFOS
+              System.out.println(cep);
+    }
+
+
+        @PostMapping
+        @Transactional
+         public void cadastrar(@RequestBody String cep) {
+              System.out.println(cep);
+    }
+---------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------
+Migration com Flyway
+PRIMEIRO DE TUDO VC TEM CRIAR DIRETORIO NO RESOURCE
+cria diretorio   ->db.migration<-
+cria arquivo com padrão de nomeclatura -> comeca com V maiusculo seguido do indentificador comçãndo do 1 __ dois andelane
+e descrever que vc vai fazer nessa migretion
+no final fica assim :
+
+V1__create-table-cliente.sql
+
+---------------------------------------------------------------------------------------------------------------------------------
+validando dados
+class record
+
+public record DataDoctor(
+        @NotNull
+        String name,
+
+)}
+
+
+ @PostMapping("/register")
+    @Transactional
+    public String registerDoctor(@RequestBody @Valid DataDoctor data){
+      return doutor.register(data);
+
+    }
+
+Na class record ou na class que vai vim as infos no json, no meu record padrão dto
+vc passa as validão tem N tipo de validão
+
+agora para falar que tem ser validadas essa infos tem colocar @valid no metodo que ta pedindo essa requisão
+no meu caso registerDoctor
+
+https://jakarta.ee/specifications/bean-validation/3.0/jakarta-bean-validation-spec-3.0.html#builtinconstraints
+documentação
+------------------------------------------------------------------------------------------------------------------------
+paginação
+   @GetMapping
+    public Page<DadosListagemMedico> listar(Pageable paginacao) {
+        return repository.findAll(paginacao).map(DadosListagemMedico::new);
+    }
+    AQUI PAGINAÇÃO BASICA, RETORNO DELE TEM QUE SER PAGE, E TIPO, TEM PASSAR PARAMENTRO Pageable
+    RETORNO DA LISTA PAGE COM PAGINAÇÃO DIRETO
+
+    Page-> AQUI TEM DETALHES DA PAGINA
+
+     @GetMapping
+        public Page<DadosListagemMedico> listar(@PageableDefault(size = 10, sort = {"nome"})Pageable paginacao) {
+            return repository.findAll(paginacao).map(DadosListagemMedico::new);
+        }
+
+        @PageableDefault-> AQUI VC CONTROLA O PAGE PARA QUANTOS REGISTRO VAI MOSTA, COMO VAI ORDENAR, ETC NA URL, VC PODE
+        MODIFICAR DE ACORDO QUE SEU FRONT QUERER
+
+------------------------------------------------------------------------------------------------------------------------
+PUT OU PATCH
+    @PutMapping-> AQUI MOSTRA QUE VAI SER ATUALIZADO
+    @Transactional-> QUE VAI TER MOVIMENTO NO BANCO DE DADOS
+    public void atualizar(@RequestBody @Valid DadosCadastroMedico dados) {
+
+    }
+PUT
+O método PUT substitui todos os atuais dados de um recurso pelos dados passados na requisição, ou seja, estamos falando de uma atualização integral. Então, com ele, fazemos a atualização total de um recurso em apenas uma requisição.
+
+PATCH
+O método PATCH, por sua vez, aplica modificações parciais em um recurso. Logo, é possível modificar apenas uma parte de um recurso. Com o PATCH, então, realizamos atualizações parciais, o que torna as opções de atualização mais flexíveis.
+------------------------------------------------------------------------------------------------------------------------------------------
+DELETE
+
+ @DeleteMapping("{/id}")-> AQUI MOSTRA QUE VAI SER DELETADO
+    @Transactional-> QUE VAI TER MOVIMENTO NO BANCO DE DADOS
+    public void DELETE(@RequestBody @PathVariable Long id) {
+    .deleById(id)
+    }
+
+------------------------------------------------------------------------------------------------------------------------
 https://spring.io/projects/spring-boot
