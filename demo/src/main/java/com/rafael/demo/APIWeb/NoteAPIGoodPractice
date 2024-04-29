@@ -124,3 +124,92 @@ public ResponseEntity tratarErro400(MethodArgumentNotValidException ex)-> se peg
 var erros = ex.getFieldErrors();-> salva esse erros
 return ResponseEntity.badRequest().body(erros.stream().map(DadosErroValidacao::new).toList());-> retorna esse erros
 para pegar erro especificos vc faz um dto
+badRequest->O código de status de resposta HTTP 400 Bad Request indica que o servidor não pode ou não irá processar a requisição devido a alguma coisa que foi entendida como um erro do cliente
+
+Nessa aula, você aprendeu como:
+Criar uma classe para isolar o tratamento de exceptions da API, com a utilização da anotação @RestControllerAdvice;
+Utilizar a anotação @ExceptionHandler, do Spring, para indicar qual exception um determinado método da classe de tratamento de erros deve capturar;
+Tratar erros do tipo 404 (Not Found) na classe de tratamento de erros;
+Tratar erros do tipo 400 (Bad Request), para erros de validação do Bean Validation, na classe de tratamento de erros;
+Simplificar o JSON devolvido pela API em casos de erro de validação do Bean Validation.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+spring sucuryti
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Você deve ter notado que o Bean Validation possui uma mensagem de erro para cada uma de suas anotações. Por exemplo, quando a validação falha em algum atributo anotado com @NotBlank, a mensagem de erro será: must not be blank.
+
+Essas mensagens de erro não foram definidas na aplicação, pois são mensagens de erro padrão do próprio Bean Validation. Entretanto, caso você queira, pode personalizar tais mensagens.
+
+Uma das maneiras de personalizar as mensagens de erro é adicionar o atributo message nas próprias anotações de validação:
+
+public record DadosCadastroMedico(
+    @NotBlank(message = "Nome é obrigatório")
+    String nome,
+
+    @NotBlank(message = "Email é obrigatório")
+    @Email(message = "Formato do email é inválido")
+    String email,
+
+    @NotBlank(message = "Telefone é obrigatório")
+    String telefone,
+
+    @NotBlank(message = "CRM é obrigatório")
+    @Pattern(regexp = "\\d{4,6}", message = "Formato do CRM é inválido")
+    String crm,
+
+    @NotNull(message = "Especialidade é obrigatória")
+    Especialidade especialidade,
+
+    @NotNull(message = "Dados do endereço são obrigatórios")
+    @Valid DadosEndereco endereco) {}COPIAR CÓDIGO
+Outra maneira é isolar as mensagens em um arquivo de propriedades, que deve possuir o nome ValidationMessages.properties e ser criado no diretório src/main/resources:
+
+nome.obrigatorio=Nome é obrigatório
+email.obrigatorio=Email é obrigatório
+email.invalido=Formato do email é inválido
+telefone.obrigatorio=Telefone é obrigatório
+crm.obrigatorio=CRM é obrigatório
+crm.invalido=Formato do CRM é inválido
+especialidade.obrigatoria=Especialidade é obrigatória
+endereco.obrigatorio=Dados do endereço são obrigatóriosCOPIAR CÓDIGO
+E, nas anotações, indicar a chave das propriedades pelo próprio atributo message, delimitando com os caracteres { e }:
+
+public record DadosCadastroMedico(
+    @NotBlank(message = "{nome.obrigatorio}")
+    String nome,
+
+    @NotBlank(message = "{email.obrigatorio}")
+    @Email(message = "{email.invalido}")
+    String email,
+
+    @NotBlank(message = "{telefone.obrigatorio}")
+    String telefone,
+
+    @NotBlank(message = "{crm.obrigatorio}")
+    @Pattern(regexp = "\\d{4,6}", message = "{crm.invalido}")
+    String crm,
+
+    @NotNull(message = "{especialidade.obrigatoria}")
+    Especialidade especialidade,
+
+    @NotNull(message = "{endereco.obrigatorio}")
+    @Valid DadosEndereco endereco) {}
