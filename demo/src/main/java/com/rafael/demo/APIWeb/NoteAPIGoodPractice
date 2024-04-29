@@ -1,0 +1,126 @@
+OQ VAMOS APRENDER
+Boas práticas na API
+Tratamento de erros
+Autenticação/Autorização
+Tokens JWT
+----------------------------------------------------------------------------------------------------------------------
+RETORNO PADRONIZADO
+RETORNO PARA EXCLUIR TEM RETORNA MAIS COMUM É 204
+DELETA
+return ResponseEntity.noContent().build(); -> esse retorna o 204
+LISTAR
+ResponseEntity.ok(object)-> esse devolve codigo 200 e algo no corpo da requisção
+ATUALIZAR
+ResponseEntity.ok(object)-> esse devolve codigo 200 e algo no corpo da requisção
+DEVOLVER DADOS ATUALIZADO
+CADASTRA
+RETORNO PARA CADASTRA TEM RETORNA MAIS COMUM É 201
+corpo dos dados ja cadastrados
+e um protocolo http (Location)
+return ResponseEntity.created(uri).body(dto);
+created(uri)-> uri representa endereço
+created(uri)-> spring vai cria cabeçario altomaticamente base na uro
+body(dto)-> oq vc vai devolver -> no corpo da requição
+
+CRIANDO CABEÇALHO E OQ VAI DEVOLVER NO CORPO DA REQUISÃO
+PARA NÃO PEGAR A URL MANUALMENTE TIPO VC ESCREVE LOCALHOST8080, NOS USAMOS ISSO NO PARAMETRO -> UriComponentsBuilder builder,
+PORQUE ELE JA PEGA CORPO URI, AUTOMATICAMENTE
+URI uri = builder -> AQUI JA TA URI SALVA
+URI uri = builder.path("/cliente/cadastra/{id}")-> AQUI ACRECENTA MAIS COISAS NA URI PEGA A URI ATUAL E ACRESCENTA MAIS OQ VC QUISER
+QUE POR EXEMPLO COMPLEMENTO, QUE VAI SER USADO PARA CRIAR CABECARIO
+URI uri = builder.path("/cliente/cadastra/{id}").buildAndExpand(clients.getId())-> AQUI VAI PEGAR ID DO MEDICO JA CADSTRADO NO BANCO E ADD
+E TROCA {ID} PELO ID DO MEDICO MEIO QUE PARAMETRO DINAMICO
+toUri()-> AQUI PARA TRASFORMAR EM OBJETO URI
+
+
+UriComponentsBuilder builder
+URI uri = builder.path("/cliente/cadastra/{id}").buildAndExpand(clients.getId()).toUri();
+return ResponseEntity.created(uri).body(Client);
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+ERROS QUE PODE OCORRE NA URI
+
+Os códigos HTTP (ou HTTPS) possuem três dígitos, sendo que o primeiro dígito significa a classificação dentro das possíveis cinco categorias.
+
+1XX: Informativo – a solicitação foi aceita ou o processo continua em andamento;
+
+2XX: Confirmação – a ação foi concluída ou entendida;
+
+3XX: Redirecionamento – indica que algo mais precisa ser feito ou precisou ser feito para completar a solicitação;
+
+4XX: Erro do cliente – indica que a solicitação não pode ser concluída ou contém a sintaxe incorreta;
+
+5XX: Erro no servidor – o servidor falhou ao concluir a solicitação.
+
+
+O código 403 é o erro “Proibido”.-> CLIENTE NÃO TEM ACESSO ESSA INFOS
+
+Error 404, significa que essa URL não te levou a lugar nenhum -> URL NÃO EXISTE
+
+Error 500, basicamente, no servidor que mantém a aplicação no ar ou na comunicação com o sistema de arquivos, que fornece a infraestrutura para a aplicação.
+
+Erro 503 significa que o serviço acessado está temporariamente indisponível
+
+https://http.dog/
+https://http.cat/
+
+
+Nessa aula, você aprendeu como:
+Utilizar a classe ResponseEntity, do Spring, para personalizar os retornos dos métodos de uma classe Controller;
+Modificar o código HTTP devolvido nas respostas da API;
+Adicionar cabeçalhos nas respostas da API;
+Utilizar os códigos HTTP mais apropriados para cada operação realizada na API.
+------------------------------------------------------------------------------------------------------------------------------
+
+
+RETORNADO ERROS
+
+Common Application Properties
+server.error.include-stacktrace=never
+esse tira a trace, oq seria diminuido retorno de infos que usario pode ver com erro
+https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html
+
+
+
+@RestControllerAdvice
+
+essa notação indica que tratamneto de erro da spring
+essa class para trata erro
+@RestControllerAdvice
+public class TratamentoDeErro {
+}
+
+
+ @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity tratandoErro404(){
+        return ResponseEntity.notFound().build();
+    }
+
+ @ExceptionHandler(EntityNotFoundException.class)
+esse codigo diz basicamente, se Aparecer erro   EntityNotFoundException-> vai retornar tal coisa
+return ResponseEntity.notFound().build();-> que é erro 404
+
+
+
+//código omitido
+
+@ExceptionHandler(MethodArgumentNotValidException.class)
+public ResponseEntity tratarErro400(MethodArgumentNotValidException ex){
+    var erros = ex.getFieldErrors();
+
+    return ResponseEntity.badRequest().body(erros.stream().map(DadosErroValidacao::new).toList());
+
+}
+
+private record DadosErroValidacao(String campo, String mensagem) {
+        public DadosErroValidacao(FieldError erro) {
+
+        }
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+public ResponseEntity tratarErro400(MethodArgumentNotValidException ex)-> se pega erro com parametro
+var erros = ex.getFieldErrors();-> salva esse erros
+return ResponseEntity.badRequest().body(erros.stream().map(DadosErroValidacao::new).toList());-> retorna esse erros
+para pegar erro especificos vc faz um dto
