@@ -460,6 +460,79 @@ UserDetailsé retornado pelo UserDetailsService. O DaoAuthenticationProvidervali
 UserDetailse retorna um Authenticationque possui um principal que é UserDetailsretornado pelo
 configurado UserDetailsService.
 user para vc dizer que qual senha, qual é login se tem tempo de expiração de token etc
+
+Nessa aula, você aprendeu como:
+Funciona o processo de autenticação e autorização em uma API Rest;
+Adicionar o Spring Security ao projeto;
+Funciona o comportamento padrão do Spring Security em uma aplicação;
+Implementar o processo de autenticação na API, de maneira Stateless, utilizando as classes e configurações do Spring Security.
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+GERANDO TOKEN
+
+<dependency>
+  <groupId>com.auth0</groupId>
+  <artifactId>java-jwt</artifactId>
+  <version>4.4.0</version>
+</dependency>
+ PRIMEIRO PESQUISA SITE JWT E ADD A BIBLOTECA QUE VAMOS USAR É AUTH0
+
+
+
+
+
+GERANDO TOKEN
+NÃO LEGAL FICAR NA CLASS CONTROLE
+ENTÃO BOM CRIA CLASS PROPRIA PARA ISSO, NO INFRA
+@Service
+public class TokenService{
+public String geraToken(uSUARUI USUARIO){
+  try {
+            var algoritmo = Algorithm.HMAC256("12345678");
+            return JWT.create()
+                .withIssuer("API Voll.med")
+                .withSubject(usuario.getLogin())
+                .withExpiresAt(dataExpiracao())
+                .sign(algoritmo);
+        } catch (JWTCreationException exception){
+            throw new RuntimeException("erro ao gerrar token jwt", exception);
+        }
+
+}
+}
+
+   private Instant dataExpiracao() {
+        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
+    }
+
+var algoritmo = Algorithm.HMAC256("12345678");
+ELE PASSA UMA SENHA SECRETA NÃO PODE SER PASSADA PARA NINGUEM QUE FAZ GERA ESSE ALGORITIMO
+
+JWT.create() -> CRIA AGORTIMOGON
+.withIssuer("API Voll.med") -> PARA INDENTIFICAR API QUE DONA DESTE AGORITMO
+.withSubject(usuario.getLogin())-> PARA AMARZERNAR QUAL USARIO E ARMAZER USUARIO
+ .withExpiresAt(dataExpiracao())-> Data de expiração do token
+.sign(algoritmo)-> AQUI GERA ALGORTIM0 FALA QUE PARA SER GERADO
+
+como vc faz para usar, vc chama ela na class controller
+
+@Autowired
+private TokenService tokenService;
+
+@PostMapping
+public ResponseEntity efetuarLogin(@RequestBody @Valid DadosAutenticacao dados) {
+    var token = new UsernamePasswordAuthenticationToken(dados.login(), dados.senha());
+    var authentication :Authentication = manager.authenticate(token);
+
+    return ResponseEntity.ok(tokenService.gerarToken((Usuario) authentication.getPrincipal()));
+}
+
+
+(Usuario) authentication.getPrincipal()-> aqui authentication ja tem usario
+
+SITE PARA REFERENCIA JWT =https://jwt.io/
+
+
+
 ==========================================================================================================================================================================================================
 
 
