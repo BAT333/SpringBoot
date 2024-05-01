@@ -5,8 +5,9 @@ application.properties:
 server.port=8081
 MUDA A PORTA DE ENTRADA
 --------------------------------------------------------------------------------------
-GET para obter dados,
-POST para enviar novos dados,
+BACK
+GET para ENVIAR dados,
+POST para OBETER novos dados,
 PUT para atualizar dados existentes,
 DELETE para remover dados.
 ----------------------------------------------

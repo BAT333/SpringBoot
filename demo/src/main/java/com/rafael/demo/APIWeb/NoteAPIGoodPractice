@@ -134,26 +134,333 @@ Tratar erros do tipo 404 (Not Found) na classe de tratamento de erros;
 Tratar erros do tipo 400 (Bad Request), para erros de validação do Bean Validation, na classe de tratamento de erros;
 Simplificar o JSON devolvido pela API em casos de erro de validação do Bean Validation.
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-spring sucuryti
+spring Security
+Autenticação
+Autorização (controle de acesso)
+Proteção contra-ataques (CSRF, clickjacking, etc.)
+Spring Security, que trata de autenticação, autorização e proteção contra ataques. Exploramos o uso de tokens JWT para autenticação e a validação do token para autorização, visando garantir o acesso apenas aos funcionários da clínica.
+primeira coisa add o spring Security
+configuração do spring Security
+
+primeiro tem criar entidade usario no java e no banco de dados
+
+package com.ByteCard.api.Usuario;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity(name = "User")
+@Table(name = "users")
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@EqualsAndHashCode(of = "id")
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(name = "logins")
+    private String login;
+    @Column(name = "senhas")
+    private String senha;
+}
+
+vc tem criar class de serviço
+
+@Service
+public class AutenticaoService implements UserDetailsService{
+
+@Autowired
+    UserRepository repository;
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return repository.findByLogin(username);
+    }
+}
+implements UserDetailsService e fazer implementação desta class, isso vai dizer para spring e spring security
+que essa class tem ser chamada sempre para ver validação tudo mais
+
+==============================================================================================================================================================================
+fazer mudanças para dizer para spring securiy que nos não quer usar programção padrão mas sim uma mesmo configurada para gente
+e feito por nos para apiRest
+
+agora vamos mudar
+stateful vamos mudar para stateless
+o stateful. Como estamos trabalhando com uma API Rest, o processo de autenticação precisa ser stateless.
+stateful-> senha e login aqui matem
+stateless -> Comunicação stateless: a comunicação feita entre cliente e servidor não deve armazenar nenhuma informação entre as solicitações
+
+
+como mudar ->
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfiguration {
+@Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http.csrf(csrf -> csrf.disable())
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .build();
+    }
+}
+
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfiguration {
+}
+
+
+@EnableWebSecurity
+Para usar @EnableWebSecurity, os desenvolvedores precisam criar uma classe anotada com esta anotação.
+Esta classe deve estender a classe WebSecurityConfigurerAdapter, que é uma classe base para configurar
+o Spring Security para uma aplicação web
+
+@Configuration -> aqui diz para spring que class de configuração
+
+
+ @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http.csrf(csrf -> csrf.disable())
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .build();
+    }
+
+
+SecurityFilterChain->
+HttpSecurity->
+.csrf->
+.csrf(csrf -> csrf.disable())
+sessionManagement->
+sessionCreationPolicy(SessionCreationPolicy.STATELESS)->
+@Bean->
+
+
+SecurityFilterChain->
+que é responsável por toda a segurança (proteger as URLs da aplicação, validar nome de usuário e senhas enviadas
+, redirecionar para o formulário de login e assim por diante) dentro da sua aplicação
+
+aqui resposta
+SecurityFilterChain é usado por FilterChainProxy para determinar quais Filterinstâncias do Spring Security
+devem ser invocadas para a solicitação atual.
+usado muito para retorno de autenticação e autorização
+
+HttpSecurity->
+Qual é a utilidade do HttpSecurity?
+A classe HttpSecurity ajuda a configurar a segurança para solicitações HTTP específicas . Além disso, permite
+usar o método requestMatcher() para restringir a configuração de segurança a um endpoint HTTP específico.
+Além disso, fornece flexibilidade para configurar a autorização para uma solicitação HTTP específica.
+
+
+.csrf->
+Cross-site Request Forgery (CSRF) é um tipo de ataque de websites maliciosos
+.csrf(csrf -> csrf.disable()) -> aqui desabilita essa tipo de proteção, mas por que vamos ultilizar outro tipo de coisa
+que não vai precisar se preocupar com isso
+
+sessionManagement-> aqui uma class com aguns atributos cria sessação com configuração restringe algumas coisas
+gerenciamento da sessao
+
+
+sessionCreationPolicy(SessionCreationPolicy.STATELESS)->
+O que é a política de criação de sessão sem estado?
+Finalmente, a opção mais estrita de criação de sessão, “stateless”, é uma garantia de que a aplicação não criará nenhuma sessão
+
+
+
+@Bean->
+O que é a anotação @bean?
+Se você usa o Spring Framework para desenvolver aplicativos Java, provavelmente encontrará anotações como @Bean
+e @Component. Essas anotações ajudam a definir e configurar os beans que compõem o contexto do aplicativo
+Basicamente quando você coloca a anotação @Bean, você está dizendo pro Spring que quer criar esse objeto e deixar ele
+disponível para outras classes utilizarem ele como dependência, por exemplo.
+serve para exportar uma classe ára o spring fazendo com que ele consiha carrega-la e fazer injeção de dependecia mesmo em outras
+class
+
+
+
+
+
+AGORA CRIA CONTROLLER PARA DISPARA PROCESSO DE AUTENTICAÇÃO
+
+Controller de autenticação
+
+
+PRIMEIRO DE TUDO CRIAR UMA CLASS CONTROLE DE AUTENTICAÇÃO COM USER
+@RestController
+@RequestMapping("/login")
+public class AutenticacaoController {
+    @Autowired
+    private AuthenticationManager manager;
+
+        @PostMapping
+        @Transactional
+        public ResponseEntity efetuarLogin(@RequestBody @Valid DadosAutenticaoLongin longin){
+            //chamar class AutenticacaoService e metodo dela loadUserByUsername
+            //mas não chamamos ela diretamente, chamamos outra class do spring essa class por baixo dos panos
+            // vai chamar essa classe de autenticaçãoService que é AuthenticationManager
+            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(longin.login(),longin.senha());
+            Authentication authenticate  =  manager.authenticate(token);
+            return ResponseEntity.ok().build();
+        }
+}
+
+
+CRIA METODO PARA EFETUAR E AUTENTICAR O LOGIN RETORNAR O TOKEN
+@PostMapping
+@Transactional
+public ResponseEntity efetuarLogin(@RequestBody @Valid DadosAutenticaoLongin longin){
+
+}
+AGORA NOS PRECISA DISPARA PROCESSO DE AUTENTICAÇÃO, METODO QUE NOS CRIAMO NO SERVICE
+MAS NOS NÃO CHAMAMOS ESSES METODO DIRETAMENTE Por quastão
+Isso é feito para garantir que a autenticação do usuário seja realizada de
+forma segura e eficiente, seguindo as boas práticas de programação.
+
+COMO FAZEMOS ISSO ???????? PARA CHAMAR ELA DE FORMA INDIRETA
+
+USANDO UMA CLASS DO PROPRIO SPRING CHAMDO AuthenticationManager
+
+@Autowired
+private AuthenticationManager manager;
+AGORA COMO VAMOS FAZER PARA USAR ESSE MANAGER
+UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(longin.login(),longin.senha());
+Authentication authenticate  =  manager.authenticate(token);
 
 
 
 
 
 
+private AuthenticationManager manager;->
+Simplificando, o AuthenticationManager é a principal interface estratégica para autenticação
+. Se o principal da autenticação de entrada for válido e verificado, AuthenticationManager#authenticate
+retornará uma instância de Authentication com o sinalizador autenticado definido como verdadeiro.
+
+Authentication authenticate  =  manager.authenticate(token) AI COM METODO authenticate ELE RETORNA SE LOGUIN VERDADEIROU OU FALSO
+SE AUTENTICAÇÃO VERDADEIRA OU FALSA
+
+UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(longin.login(),longin.senha());
+Classe UsernamePasswordAuthenticationToken. Uma implementação de autenticação projetada para apresentação
+simples de nome de usuário e senha . O principal e as credenciais devem ser definidos com um Objeto que forneça a
+respectiva propriedade por meio de seu Objeto. Método toString().
+
+AI RETORNA UM TOKEN -> QUE VAI PARA AUTENTICAÇÃO VER QUE TODAS AS CREDENCIAS ESTA CERTA E ESTA NO BANCO
+ELES ESPERA CLASS DELES MESMO
 
 
+DEPOIS DISSO VC TEM MEIO QUE FAZER A INJEÇÃO NO MANAGER, POR QUE MEIO QUE SPRING NÃO CONSEGUE FAZER ISSO AUTOMATIMENTE
+A NÃO SER QUE NOS DIZ PARA ELE FAZER, COMO FAZ ISSO
+NA CLASS SECURITYcONFIGURANTIONS
+@Bean
+    public AuthenticationManager manager (AuthenticationConfiguration configuration){
+        try {
+            return configuration.getAuthenticationManager();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+CRIA UMA CLASS QUE DEIXA PARA SPRING INICIAR MESMO TIVER FORA DO RESTCONTROLER COM BEAN E INICIALIZALA
+=================================================================================================================================================
+senha criptografada em algotitmo Bcrypt
+configura como vai ser autenticado com tipo de autenicação cipritrografia que foi ultilizado
+vc pode configura isso securityConfigurtion
+
+  @Bean
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+
+PasswordEncoder->
+O suporte ao servlet do Spring Security inclui o armazenamento seguro de senhas por
+meio da integração com o PasswordEncoder. Você pode personalizar a PasswordEncoderimplementação
+usada pelo Spring Security expondo um PasswordEncoderBean .
+
+  return new BCryptPasswordEncoder();-> tipo de criptografia que vc quer
+
+como saber que ta usando
 
 
+Bcrypt
+Scrypt
+Argon2
+PBKDF2
+=====================================================================================================================================================================================================
+class
+interface
+
+package com.ByteCard.api.Usuario;
+
+import jakarta.persistence.*;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
+
+@Entity(name = "User")
+@Table(name = "users")
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@EqualsAndHashCode(of = "id")
+public class User implements UserDetails {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(name = "logins")
+    private String login;
+    @Column(name = "senhas")
+    private String senha;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+       return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    @Override
+    public String getPassword() {
+        return this.senha;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.login;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+}
 
 
+UserDetails->
 
-
-
-
-
-
-
+UserDetailsé retornado pelo UserDetailsService. O DaoAuthenticationProvidervalida
+UserDetailse retorna um Authenticationque possui um principal que é UserDetailsretornado pelo
+configurado UserDetailsService.
+user para vc dizer que qual senha, qual é login se tem tempo de expiração de token etc
+==========================================================================================================================================================================================================
 
 
 Você deve ter notado que o Bean Validation possui uma mensagem de erro para cada uma de suas anotações. Por exemplo, quando a validação falha em algum atributo anotado com @NotBlank, a mensagem de erro será: must not be blank.
