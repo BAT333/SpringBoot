@@ -532,10 +532,215 @@ public ResponseEntity efetuarLogin(@RequestBody @Valid DadosAutenticacao dados) 
 SITE PARA REFERENCIA JWT =https://jwt.io/
 
 
+mas basicamente sobre secret
+
+na  application.properties, pode ser com qualaquer nome
+api.security.token.secret=${JWT_SECRET:123234} -> ai vc com variavel de ambiente e se não tiver usa 2341234
+modo de usar
+    @Value("${api.security.token.secret}")
+    private String secret;
+
+
+Nessa aula, você aprendeu como:
+Adicionar a biblioteca Auth0 java-jwt como dependência do projeto;
+Utilizar essa biblioteca para realizar a geração de um token na API;
+Injetar uma propriedade do arquivo application.properties em uma classe gerenciada pelo Spring, utilizando a anotação @Value;
+Devolver um token gerado na API quando um usuário se autenticar nela.
+
+-----------------------------------------------------------------------------------------------------------------------------------
+FOCO NESSA AULA PARTE DE AUTORIZAÇÃO
+BLOQUEAR REQUIÇÃO SE NÃO TIVER AUTORIZADA
+PRIMEIRO TEM CRIAR UMA CLASS PARA PARA FILTRA TODAS ESSAS REQUISÇÃO
+CRIA NO INFRA NO SECURITY
+COMO ANOTAÇÃO COMPONENT
+@Component
+public class SecurityFilter extends OncePerRequestFilter {
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        filterChain.doFilter(request,response);
+    }
+
+
+
+
+@Component é ultilizado para que o spring carregue uma classe/componente genericos
+uma class com generica
+
+OncePerRequestFilter->
+OncePerRequestFilter em tais situações. Spring garante que OncePerRequestFilter seja executado apenas uma vez para uma determinada solicitação.
+
+
+ESSA CLASS GARANTE QUE SO VAI SER VALIDADO UMA VEZ BASICAMENTE FAZ COM QUE ESSE METODO A CADA REQUISÇÃO SO RODE UMA VEZ
+ @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        filterChain.doFilter(request,response);
+    }
+
+
+FILTERCHAIN -> REPRESENTA A CADEIA DE FILTRO NA APLICAÇÃO
+FILTERCHAIN.doFilter(resquest,reponse):
+necessario para chamar os proximos filtros na aplicação
+
+filterChain.doFilter(request,response);
+Os filtros usam FilterChain para invocar o próximo filtro na cadeia ou, se o filtro de chamada for o último filtro na cadeia, para invocar o recurso no final da cadeia
+doFilter->chain.doFilter()está avançando para o próximo elemento da cadeia. O último elemento da cadeia é o recurso/servlet de destino.
+
+
+========================================================================================================================================================================================================================================
+primeiro de tudo recupera token
+
+@Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String tokenJWT = recuperaToken(request);
+        filterChain.doFilter(request,response);
+    }
+
+
+  private String recuperaToken(HttpServletRequest request) {
+        String token =  request.getHeader("Authorization");
+        if(token == null){
+            throw new RuntimeException("TOKEN NÃO ENCONTRADO");
+        }else{
+            return token;
+        }
+
+    }
+ String token =  request.getHeader("Authorization");-> AQUI NO REQUEST DO CABECARIO RECUPERA O TOKEN
+
+getHeader("Authorization")-> AQUI PEGA TOKEN, ONDE ELE DEVIA ESTA QUE É NO Authorization
+======================================================================================================================================================================================================================
+validando infos do token
+
+public String getSubject(String tokenJWT){
+        try {
+            var algoritmo = Algorithm.HMAC256(secret);
+            return JWT.require(algoritmo)
+                    .withIssuer("API BANK")
+                    .build()
+                    .verify(tokenJWT)
+                    .getSubject();
+        } catch (JWTVerificationException exception) {
+            throw new RuntimeException("Token JWT inválido ou expirado!");
+        }
+
+    }
+
+    AQUI VC VAI PEGAR USUARIO
+    .verify(tokenJWT)-> VERFICA QUE ESTA VALIDO
+    .getSubject(); -> RETORNA OBJETO
+
+
+
+AQUI NA CLASS SECUTIRYFILTER
+USAR ISSO NA PRIMEIRA PARTE
+String subject = tokenService.getSubject(tokenJWT);
+
+ @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return
+                http.csrf(csrf -> csrf.disable())
+                        .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .authorizeHttpRequests(req -> {
+                            req.requestMatchers("/login").permitAll();
+                            req.anyRequest().authenticated();
+                        })
+                        .build();
+    }
+
+      ESSE TRECHO DE CODIGO
+ .authorizeHttpRequests(req -> {
+                            req.requestMatchers("/login").permitAll();
+                            req.anyRequest().authenticated();
+                        })
+
+
+
+authorizeHttpRequests()-> para dizer como vai ser as autorização das requisção
+oq pode acessar antes ou depois que precisa de autorização ou não
+req.requestMatchers("/login").permitAll();, -> aqui diz que todo que tem /login  tem permição todal, para seguiser sem
+um token
+
+, o método permitAll() é usado com o método antMatchers() para permitir acesso irrestrito ao endpoint /gfg .
+Isso significa que qualquer usuário, autenticado ou não, poderá acessar este endpoint sem qualquer verificação
+adicional de autenticação ou autorização
+
+req.anyRequest().authenticated();-> aqui que os demais precisar ser autenticados
+
+qualquer pedido(). authenticated() – anyRequest() define uma cadeia de regras para qualquer solicitação
+que não corresponda às regras anteriores . No nosso caso, tais solicitações serão repassadas desde que
+sejam autenticadas. Observe que só pode haver uma regra padrão na configuração e ela precisa estar no final.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+como detrminar ordem de importancia de filtro, qual deve ser chamado promeiro
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return
+                http.csrf(csrf -> csrf.disable())
+                        .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .authorizeHttpRequests(req -> {
+                            req.requestMatchers("/login").permitAll();
+                            req.anyRequest().authenticated();
+                        })
+                        .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                        .build();
+    }
+
+.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+isso server para vc add ordem de prioridade, para um filter oq vem antes oq vem depois etc
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Para saber mais: controle de acesso por anotações
+@Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    return http.csrf().disable()
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and().authorizeHttpRequests()
+        .requestMatchers(HttpMethod.POST, "/login").permitAll()
+        .requestMatchers(HttpMethod.DELETE, "/medicos").hasRole("ADMIN")
+        .requestMatchers(HttpMethod.DELETE, "/pacientes").hasRole("ADMIN")
+        .anyRequest().authenticated()
+        .and().addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+        .build();
+}
+ .requestMatchers(HttpMethod.DELETE, "/medicos").hasRole("ADMIN")
+ .requestMatchers(HttpMethod.DELETE, "/pacientes").hasRole("ADMIN")
+Repare que no código anterior foram adicionadas duas linhas, indicando ao Spring Security que as requisições
+do tipo DELETE para as URLs /medicos e /pacientes somente podem ser executadas por usuários autenticados e cujo
+perfil de acesso seja ADMIN.
+=======================================================================================================================================================================================================================
+Outra maneira de restringir o acesso a determinadas funcionalidades
+
+@GetMapping("/{id}")
+@Secured("ROLE_ADMIN")
+public ResponseEntity detalhar(@PathVariable Long id) {
+    var medico = repository.getReferenceById(id);
+    return ResponseEntity.ok(new DadosDetalhamentoMedico(medico));
+}
+
+@EnableMethodSecurity(securedEnabled = true)
+Atenção! Por padrão esse recurso vem desabilitado no spring Security, sendo que para o utilizar devemos adicionar
+a seguinte anotação na classe Securityconfigurations do projeto:
+
+
+
+
+
+
+
+sites para estudar e ler
+https://docs.spring.io/spring-security/reference/servlet/authorization/method-security.html
+https://jwt.io/
+
+
+Funcionam os Filters em uma requisição;
+Implementar um filter criando uma classe que herda da classe OncePerRequestFilter, do Spring;
+Utilizar a biblioteca Auth0 java-jwt para realizar a validação dos tokens recebidos na API;
+Realizar o processo de autenticação da requisição, utilizando a classe SecurityContextHolder, do Spring;
+Liberar e restringir requisições, de acordo com a URL e o verbo do protocolo HTTP.
+
 
 ==========================================================================================================================================================================================================
 
-
+-----------------------------------------------------------------------------------------------------------------------------------------
 Você deve ter notado que o Bean Validation possui uma mensagem de erro para cada uma de suas anotações. Por exemplo, quando a validação falha em algum atributo anotado com @NotBlank, a mensagem de erro será: must not be blank.
 
 Essas mensagens de erro não foram definidas na aplicação, pois são mensagens de erro padrão do próprio Bean Validation. Entretanto, caso você queira, pode personalizar tais mensagens.
@@ -594,3 +799,100 @@ public record DadosCadastroMedico(
 
     @NotNull(message = "{endereco.obrigatorio}")
     @Valid DadosEndereco endereco) {}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ===============================================================================================================================================================================
+    Além do Issuer, Subject e data de expiração, podemos incluir outras informações
+     no token JWT, de acordo com as necessidades da aplicação. Por exemplo, podemos
+      incluir o id do usuário no token, para isso basta utilizar o método withClaim:
+
+    return JWT.create()
+        .withIssuer("API Voll.med")
+        .withSubject(usuario.getLogin())
+
+        .withClaim("id", usuario.getId())
+
+        .withExpiresAt(dataExpiracao())
+        .sign(algoritmo);COPIAR CÓDIGO
+    O método withClaim recebe dois parâmetros, sendo o primeiro uma String que
+     identifica o nome do claim (propriedade armazenada no token), e o segundo
+      a informação que se deseja armazenar.
+=========================================================================================================================================================================
+@WebFilter(urlPatterns = "/api/**")
+public class LogFilter implements Filter {
+
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        System.out.println("Requisição recebida em: " + LocalDateTime.now());
+        filterChain.doFilter(servletRequest, servletResponse);
+    }
+
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+@RestControllerAdvice
+public class TratadorDeErros {
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity tratarErro404() {
+        return ResponseEntity.notFound().build();
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity tratarErro400(MethodArgumentNotValidException ex) {
+        var erros = ex.getFieldErrors();
+        return ResponseEntity.badRequest().body(erros.stream().map(DadosErroValidacao::new).toList());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity tratarErro400(HttpMessageNotReadableException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity tratarErroBadCredentials() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciais inválidas");
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity tratarErroAuthentication() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Falha na autenticação");
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity tratarErroAcessoNegado() {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acesso negado");
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity tratarErro500(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro: " +ex.getLocalizedMessage());
+    }
+
+    private record DadosErroValidacao(String campo, String mensagem) {
+        public DadosErroValidacao(FieldError erro) {
+            this(erro.getField(), erro.getDefaultMessage());
+        }
+    }
+}
