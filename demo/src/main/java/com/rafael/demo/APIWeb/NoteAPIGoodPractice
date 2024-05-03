@@ -686,7 +686,27 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
 
 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
 isso server para vc add ordem de prioridade, para um filter oq vem antes oq vem depois etc
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    String tokenJWT = recuperaToken(request);
+        System.out.println(tokenJWT);
+        if(tokenJWT != null){
+            String subject = tokenService.getSubject(tokenJWT);
+            UserDetails user = repository.findByLogin(subject);
+            var authentication = new UsernamePasswordAuthenticationToken(user,null,user.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
 
+        filterChain.doFilter(request,response);
+    }
+
+    private String recuperaToken(HttpServletRequest request) {
+        String token =  request.getHeader("Authorization");
+        if(token != null){
+            return token.replace("Bearer ","");
+        }
+        return null;
+
+    }
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Para saber mais: controle de acesso por anotações
 @Bean

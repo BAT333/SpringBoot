@@ -1,13 +1,18 @@
 package com.rafael.demo.APIWeb.Doctor.service;
 
-import com.rafael.demo.APIWeb.Doctor.model.DoctorUpdate;
-import com.rafael.demo.APIWeb.Doctor.model.ListDoctor;
 import com.rafael.demo.APIWeb.Doctor.Doctor;
 import com.rafael.demo.APIWeb.Doctor.model.DataDoctor;
+import com.rafael.demo.APIWeb.Doctor.model.DoctorUpdate;
+import com.rafael.demo.APIWeb.Doctor.model.ListDoctor;
 import com.rafael.demo.APIWeb.Doctor.repository.DoctorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,12 +22,13 @@ public class ServiceDoutor {
     DoctorRepository doctorRepository;
 
 
-    public String register(DataDoctor data) {
+    public ResponseEntity<ListDoctor> register(DataDoctor data, UriComponentsBuilder builder) {
         if(this.doctorExists(data.crm())){
-            doctorRepository.save(new Doctor(data));
-            return "REGISTER";
+            Doctor doctor = doctorRepository.save(new Doctor(data));
+            URI uri = builder.path("/Doctor/{id}").buildAndExpand(doctor.getId()).toUri();
+            return ResponseEntity.created(uri).body(new ListDoctor(doctor));
         }else {
-          throw new RuntimeException("DOCTOR EXISTS");
+            throw new RuntimeException("DOCTOR EXISTS");
         }
     }
 
@@ -35,17 +41,20 @@ public class ServiceDoutor {
         }
     }
 
-    public List<ListDoctor> listDoctor() {
-       //return doctorRepository.findAll().stream().map(ListDoctor::new).collect(Collectors.toList());
-        return doctorRepository.listDoctors().stream().map(ListDoctor::new).collect(Collectors.toList());
+    public ResponseEntity<Page<ListDoctor>> listDoctor(Pageable pageable) {
+        //return doctorRepository.findAll().stream().map(ListDoctor::new).collect(Collectors.toList());
+        return ResponseEntity.ok(doctorRepository.findAll(pageable).map(ListDoctor::new));
     }
 
-    public void updateDoctor(DoctorUpdate update,Long id) {
-        doctorRepository.findById(id).get().updateInfos(update);
+    public ResponseEntity<ListDoctor>  updateDoctor(DoctorUpdate update,Long id) {
+        Doctor doctor = doctorRepository.findById(id).get();
+        doctor.updateInfos(update);
+        return ResponseEntity.ok(new ListDoctor(doctor));
     }
 
-    public void exclusionDoctor(Long id) {
-    //   doctorRepository.findByCrm(crm).ifPresent(Doctor::active);
+    public ResponseEntity exclusionDoctor(Long id) {
+        //   doctorRepository.findByCrm(crm).ifPresent(Doctor::active);
         doctorRepository.findById(id).ifPresent(Doctor::exclusion);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -6,8 +6,13 @@ import com.rafael.demo.APIWeb.patient.model.DataPatient;
 import com.rafael.demo.APIWeb.patient.model.DataUpdatePatient;
 import com.rafael.demo.APIWeb.patient.repository.RepositoryPatient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,9 +21,11 @@ public class PatientService {
     @Autowired
     RepositoryPatient repositoryPatient;
 
-    public void register(DataPatient data) {
+    public ResponseEntity<DataListPatient> register(DataPatient data, UriComponentsBuilder builder) {
         if(this.existsPatient(data.cpf())){
-            repositoryPatient.save(new Patient(data));
+           Patient patient = repositoryPatient.save(new Patient(data));
+            URI uri = builder.path("/patient/{id}").buildAndExpand(patient.getId()).toUri();
+           return ResponseEntity.created(uri).body(new DataListPatient(patient));
         }else{
             throw new RuntimeException("PATIENT EXISTS");
         }
@@ -28,16 +35,19 @@ public class PatientService {
         return repositoryPatient.findByCpf(cpf).isEmpty();
     }
 
-    public List<DataListPatient> list() {
-        return repositoryPatient.listPatient().stream().map(DataListPatient::new).collect(Collectors.toList());
+    public ResponseEntity<Page<DataListPatient>> list(Pageable pageable) {
+        return ResponseEntity.ok(repositoryPatient.findAll(pageable).map(DataListPatient::new));
     }
 
-    public void update(Long id, DataUpdatePatient updatePatient) {
-        this.repositoryPatient.findById(id).get().updateDate(updatePatient);
+    public ResponseEntity<DataListPatient> update(Long id, DataUpdatePatient updatePatient) {
+        Patient patient = repositoryPatient.findById(id).get();
+        patient.updateDate(updatePatient);
+        return ResponseEntity.ok(new DataListPatient(patient));
 
     }
 
-    public void exclusion(Long id) {
+    public ResponseEntity exclusion(Long id) {
         this.repositoryPatient.findById(id).ifPresent(Patient::exclusion);
+        return ResponseEntity.noContent().build();
     }
 }

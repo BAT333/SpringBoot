@@ -5,8 +5,14 @@ import com.rafael.demo.APIWeb.Doctor.model.DoctorUpdate;
 import com.rafael.demo.APIWeb.Doctor.model.ListDoctor;
 import com.rafael.demo.APIWeb.Doctor.service.ServiceDoutor;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
@@ -18,23 +24,24 @@ public class DoctorController {
 
     @PostMapping("/register")
     @Transactional
-    public String registerDoctor(@RequestBody DataDoctor data){
-      return doutor.register(data);
+    public ResponseEntity<ListDoctor> registerDoctor(@RequestBody @Valid DataDoctor data, UriComponentsBuilder builder){
+      return doutor.register(data,builder);
 
     }
     @GetMapping("/list")
-    public List<ListDoctor> listDoctor(){
-        return doutor.listDoctor();
+    public ResponseEntity<Page<ListDoctor>> listDoctor(@PageableDefault(size = 10, sort = {"name"}) Pageable pageable){
+        return doutor.listDoctor(pageable);
 
     }
     @PutMapping("/update/{id}")
     @Transactional
-    public void update(@PathVariable Long id,@RequestBody DoctorUpdate update){
-        doutor.updateDoctor(update,id);
+    public ResponseEntity<ListDoctor>  update(@PathVariable Long id,@RequestBody @Valid DoctorUpdate update){
+        return doutor.updateDoctor(update,id);
     }
     @PutMapping("/exclusion/{id}")
     @Transactional
-    public void exclusion(@PathVariable Long id){
-        doutor.exclusionDoctor(id);
+    public ResponseEntity exclusion(@PathVariable Long id){
+
+        return doutor.exclusionDoctor(id);
     }
 }
