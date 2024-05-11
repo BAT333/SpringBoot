@@ -1,0 +1,505 @@
+A anotação @JsonAlias serve para mapear “apelidos” alternativos para os campos que serão recebidos do JSON,
+sendo possível atribuir múltiplos alias:
+public record DadosCompra(
+    @JsonAlias({“produto_id”, “id_produto”}) Long idProduto,
+    @JsonAlias({“data_da_compra”, “data_compra”}) LocalDate dataCompra
+){}
+
+o formato ao qual a data/hora será recebida na API, sendo que isso pode ser feito diretamente no DTO,
+com a utilização da anotação @JsonFormat:
+
+@NotNull
+@Future
+@JsonFormat(pattern = "dd/MM/yyyy HH:mm")
+LocalDateTime data
+
+LINK DE FORMATAÇÃO DE DATA
+https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+diferença
+findByid = para pegar objetos para fazer manipulação
+getReferencibyid = para so fazer referencia mais recomendado
+
+@Query("""
+                select m from Medico m
+                where
+                m.ativo = 1
+                and
+                m.especialidade = :especialidade
+                and
+                m.id not in(
+                        select c.medico.id from Consulta c
+                        where
+                        c.data = :data
+                )
+                order by rand()
+                limit 1
+                """)
+
+criando query
+
+
+
+validação de horario
+package med.voll.api.domain.consulta.validacoes;
+
+import med.voll.api.domain.ValidacaoException;
+import med.voll.api.domain.consulta.DadosAgendamentoConsulta;
+
+import java.time.DayOfWeek;
+
+public class ValidadorHorarioFuncionamentoClinica {
+
+    public void validar(DadosAgendamentoConsulta dados) {
+        var dataConsulta = dados.data();
+
+        var domingo = dataConsulta.getDayOfWeek().equals(DayOfWeek.SUNDAY);
+        var antesDaAberturaDaClinica = dataConsulta.getHour() < 7;
+        var depoisDoEncerramentoDaClinica = dataConsulta.getHour() > 18;
+        if (domingo || antesDaAberturaDaClinica || depoisDoEncerramentoDaClinica) {
+            throw new ValidacaoException("Consulta fora do horário de funcionamento da clínica");
+        }
+
+    }
+
+    public void validar(DadosAgendamentoConsulta dados) {
+        var dataConsulta = dados.data();
+        var agora = LocalDateTime.now();
+        var diferencaEmMinutos = Duration.between(agora, dataConsulta).toMinutes();
+
+        if (diferencaEmMinutos < 30) {
+            throw new ValidacaoException("Consulta deve ser agendada com antecedência mínima de 30 minutos");
+        }
+
+    }
+    para todas essas class de validadeção nos pode colocar @componente ou service
+    na interface spring injegeta automaticamente
+
+
+}
+
+@Autowired
+private List<ValidadorAgendamentoDeConsulta> validadores;
+validadores.forEach(v -> v.validar(dados));
+
+com interface implementa todos cria uma lista com todas classe que implementa essa class
+assim criando uma lista, se podendo passa for por ela qualquer coisa da errado passa execptions
+
+PADRÃO SOLID -> LEMBRA DE REVISAR, LEBRA DAS INTERFACES EXTENDES, @componete, e que da para trasformar em list
+
+
+JAVA DOC
+  <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+      <version>2.5.0</version>
+   </dependency>
+http://server:port/context-path/swagger-ui.html
+http://server:port/context-path/v3/api-docs
+spring incializ
+spring boot
+spring doc
+https://www.openapis.org/-> para saber mais
+
+ @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+                .components(new Components()
+                        .addSecuritySchemes("bearer-key",
+                                new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")));
+    }
+    que vai mandar autenticação vai url
+    @SecurityRequirement(name = "bearer-key")
+aqui dizendo precisa deste recrerimento
+
+.PropertyReferenceException-> uma exception aleatoria que deu
+
+
+   authorize.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll();
+   lembra do spring config libera essas url
+-------------------------------------------------------------------------------------------------------------------------------------
+teste
+teste automatizado com junit,mockito,hamcrest,assertJ
+
+
+@DataJpaTest-> para dizer que pesquisa de jpa test
+
+
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+aqui diz para teste automatizado que para usar banco de dados da maquina mysql, oq vamos ultilizar
+por que se não dizer vai usar o em memoria qualquer um que tem
+
+
+
+para vc testa suas coisa em diferente banco de dados, não mesmo do desvolvimento
+vc pode cria um  application-test.properties pode cria quantos quiser
+
+@ActiveProfiles("test")
+dizendo qual properties tem usar
+
+@DisplayName("AQUI SERVE PARA DESCREVE PARA QUE SERVE METODO ")
+
+
+
+@Autowired
+private TestEntityManager em;
+para um entiyManager de test
+
+assertThat(user).isNull(); -> aqui para ver se esta retornado certo,acertivo tem varios metodos para comparar
+etc
+
+
+@Test
+@DisplayName("Deveria devolver medico quando ele estiver disponivel na data")
+void escolherMedicoAleatorioLivreNaDataCenario2() {
+given" ou "arrange"
+     var proximaSegundaAs10 = LocalDate.now()
+                    .with(TemporalAdjusters.next(DayOfWeek.MONDAY))
+                    .atTime(10, 0);
+    var medico = cadastrarMedico("Medico", "medico@voll.med", "123456", Especialidade.CARDIOLOGIA);
+
+
+
+when" ou "act
+
+    var medicoLivre = medicoRepository.escolherMedicoAleatorioLivreNaData(Especialidade.CARDIOLOGIA, proximaSegundaAs10);
+
+
+
+"then" ou "assert".
+
+    assertThat(medicoLivre).isEqualTo(medico);
+}
+
+package com.rafael.demo.APIWeb.appointmentscheduling.repository;
+
+import com.rafael.demo.APIWeb.user.repository.UserRepository;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.ActiveProfiles;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@ActiveProfiles("test")
+class ConsultationRepositoryTest {
+    @Autowired
+    private UserRepository repository;
+    @Autowired
+    private TestEntityManager em;
+    @Test
+    @DisplayName("AQUI SERVE PARA DESCREVE PARA QUE SERVE METODO ")
+    void findByDoctorAndConsultationDateBetween() {
+       var user = repository.findByLogin("rafael.alves.@vaz");
+        assertThat(user).isNull();
+
+    }
+}
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+teste controler
+
+@SpringBootTest- > para dizer que ta testando um controler
+
+
+@Autowired
+private MockMvc mvc;->  simula requisção http usando padrão mvc
+
+
+@AutoConfigureMockMvc-> para coseguir injetar precisa add isso la na class
+
+
+mvc.perform()-> vai performar um requisição na api
+
+@WithMockUser-> simula que usario esta logado isso diz para spring que usario esta logado
+mvc.perform-> simula uma requisção na api
+
+mvc.perform(delete("/Doctor/exclusion/7"))-.aqui pega o tipo do metodo que vc quer testa metodohttp-> delete, post, get etc
+e url
+
+.andReturn().getResponse();-> primeira parte pegar return, segunda pega response salva response
+
+assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+response.getStatus()-> aqui pega status, isEqualTo aqui compra
+HttpStatus.BAD_REQUEST.value()-> aqui pega status o oq vc espera retorna e valor dele com velues
+HttpStatus.BAD_REQUEST.value()-> aqui pega status o oq vc espera retorna e valor dele com velues
+
+
+package com.rafael.demo.APIWeb.Doctor.Controller;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.MockMvc;
+
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+class DoctorControllerTest {
+@Autowired
+private MockMvc mvc;
+
+    @Test
+    @DisplayName("ERRO SE NÃO ENCONTRA")
+    @WithMockUser
+    void exclusion() throws Exception {
+       var response =  mvc.perform(delete("/Doctor/exclusion/7"))
+                .andReturn().getResponse();
+
+       assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+    }
+}
+----------------------------------------------------------------------------------------------------------------
+testando codigo 200
+
+@AutoConfigureJsonTesters -> para dizer que vai trabalha com json test para autoconfigura para test em json
+@Autowired
+private JacksonTester<DataDoctor> dataDoctorjsonTest;
+@Autowired
+private JacksonTester<ListDoctor> listDoctorjsontest;
+aqui para simular dtos que nos utilizamos mesmo que usamos no controler
+@MockBean
+private ServiceDoutor doutor;
+esse metodos diz para test para o mokito, spring que não precisa injetar dentro do atributo
+*------
+
+.contentType(MediaType.APPLICATION_JSON)-> para dizer para servidor simulado que estavamos levando dados tipo json, mas pode ser N tipos que vc tver retornado
+.content()-> aqui faz leva json leva dados do json JacksonTester -> isso leva json , mostra que json, trasforma seu dto ou sua class
+em um json
+
+.contentType(MediaType.APPLICATION_JSON)
+                .content(dadosAgendamentoConsultaJson.write(
+                    new DadosAgendamentoConsulta(2l, 5l, data, especialidade)
+                ).getJson())
+dadosAgendamentoConsultaJson-> aqui  atributo jeckson write()-> escreve o com class e com meto getJson()-< trasforma em json
+como pode trasforma em outras coisas
+private JacksonTester<Dadosagendamento> dadosAgendamentoConsultaJson;
+ .andReturn().getResponse)-> eretorna algo e pega response dete retorno
+
+    assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+aqui mostra que metodo http esperado foi certo e faz testes ve que deu tudo certo
+
+
+
+
+
+
+
+
+  var jsonEsperado = dadosDetalhamentoConsultaJson.write(
+        dadosDetalhamento
+    ).getJson();
+    aqui mesma coisa pega jeckson e escreve dentro retorn em string
+
+
+    assertThat(response.getContentAsString()).isEqualTo(jsonEsperado);
+compra que resultado um vai ser igual resultado com isEqualTo
+
+
+
+@AutoConfigureJsonTesters
+precisa do autoConfig para injetar as coisas no jekeson
+
+
+
+
+
+
+
+
+@MockBean
+private ServiceDoutor doutor;
+aqui faz look diz para spring de test que ele não pode injetar depednecia aqui
+
+
+
+
+var dadosDetalhamento = new DadosDetalhamentoConsulta(null, 2l, 5l, data);
+    when(agendaDeConsultas.agendar(any())).thenReturn(dadosDetalhamento);
+
+   when(agendaDeConsultas.agendar(any())).thenReturn(dadosDetalhamento);
+aqui diz quando a agenda for chamada(any())). espera que retorna dadosDetelhamento consulta
+
+
+    var jsonEsperado = dadosDetalhamentoConsultaJson.write(
+        dadosDetalhamento
+    ).getJson();
+
+    assertThat(response.getContentAsString()).isEqualTo(jsonEsperado);
+    faz comperação dele
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-
+@Autowired
+private JacksonTester<ListDoctor> listDoctorjsontest;
+// Trecho de código suprimido
+
+@Test
+@DisplayName("Deveria devolver codigo http 200 quando informações estão validas")
+@WithMockUser
+void agendar_cenario2() throws Exception {
+    var data - LocalDateTime.now().plusHours(1);
+    var especialidade = Especialidade.CARDIOLOGIA;
+
+    var dadosDetalhamento = new DadosDetalhamentoConsulta(null, 2l, 5l, data);
+    when(agendaDeConsultas.agendar(any())).thenReturn(dadosDetalhamento);
+
+    var response = mvc
+        .perform(
+            post("/consultas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(dadosAgendamentoConsultaJson.write(
+                    new DadosAgendamentoConsulta(2l, 5l, data, especialidade)
+                ).getJson())
+        )
+        .andReturn().getResponse);
+
+    assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+
+    var jsonEsperado = dadosDetalhamentoConsultaJson.write(
+        dadosDetalhamento
+    ).getJson();
+
+    assertThat(response.getContentAsString()).isEqualTo(jsonEsperado);
+}
+
+
+
+
+
+
+
+
+ex codigo de test
+@SpringBootTest
+@AutoConfigureMockMvc
+@AutoConfigureJsonTesters
+class MedicoControllerTest {
+
+    @Autowired
+    private MockMvc mvc;
+
+    @Autowired
+    private JacksonTester<DadosCadastroMedico> dadosCadastroMedicoJson;
+
+    @Autowired
+    private JacksonTester<DadosDetalhamentoMedico> dadosDetalhamentoMedicoJson;
+
+    @MockBean
+    private MedicoRepository repository;
+
+}
+
+@Test
+@DisplayName("Deveria devolver codigo http 400 quando informacoes estao invalidas")
+@WithMockUser
+void cadastrar_cenario1() throws Exception {
+    var response = mvc
+.perform(post("/medicos"))
+            .andReturn().getResponse();
+
+    assertThat(response.getStatus())
+.isEqualTo(HttpStatus.BAD_REQUEST.value());
+}
+
+
+
+
+
+
+
+@Test
+@DisplayName("Deveria devolver codigo http 200 quando informacoes estao validas")
+@WithMockUser
+void cadastrar_cenario2() throws Exception {
+    var dadosCadastro = new DadosCadastroMedico(
+            "Medico",
+            "medico@voll.med",
+            "61999999999",
+            "123456",
+            Especialidade.CARDIOLOGIA,
+            dadosEndereco());
+
+    when(repository.save(any())).thenReturn(new Medico(dadosCadastro));
+
+    var response = mvc
+            .perform(post("/medicos")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(dadosCadastroMedicoJson.write(dadosCadastro).getJson()))
+            .andReturn().getResponse();
+
+    var dadosDetalhamento = new DadosDetalhamentoMedico(
+            null,
+            dadosCadastro.nome(),
+            dadosCadastro.email(),
+            dadosCadastro.crm(),
+            dadosCadastro.telefone(),
+            dadosCadastro.especialidade(),
+            new Endereco(dadosCadastro.endereco())
+    );
+    var jsonEsperado = dadosDetalhamentoMedicoJson.write(dadosDetalhamento).getJson();
+
+    assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED.value());
+    assertThat(response.getContentAsString()).isEqualTo(jsonEsperado);
+}
+
+
+
+
+
+private DadosEndereco dadosEndereco() {
+    return new DadosEndereco(
+            "rua xpto",
+            "bairro",
+            "00000000",
+            "Brasilia",
+            "DF",
+            null,
+            null
+    );
+}
+
+Nesta aula, você aprendeu como:
+Escrever testes automatizados em uma aplicação com Spring Boot;
+Escrever testes automatizados de uma interface Repository, seguindo a estratégia de usar o mesmo banco de dados que a aplicação utiliza;
+Sobrescrever propriedades do arquivo application.properties, criando outro arquivo chamado application-test.properties que seja carregado apenas ao executar os testes, utilizando para isso a anotação @ActiveProfiles;
+Escrever testes automatizados de uma classe Controller, utilizando a classe MockMvc para simular requisições na API;
+Testar cenários de erro 400 e código 200 no teste de uma classe controller.
+
+
+
+
+
+
+
+
+
+
