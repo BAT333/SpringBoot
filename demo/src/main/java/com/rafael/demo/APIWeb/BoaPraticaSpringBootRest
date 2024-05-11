@@ -496,8 +496,120 @@ Testar cenários de erro 400 e código 200 no teste de uma classe controller.
 
 
 
+----------------------------------------------------------------------------------------------------------------------------------
+PARA FAZER BIUDER DA APLICAÇÃO E MANDAR ELA PARA SERVIDOR
+
+CRIAR PROPERTIES, PARA PRODUÇÃO
+APPLICATION-PROD
+
+ADD VARIAVEL DE AMBIENTE
 
 
+spring.datasource.url=${DATASOURCE_URL}
+spring.datasource.username=${DATASOURCE_USERNAME}
+spring.datasource.password=${DATASOURCE_PASSWORD}
+
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.format_sql=false
+
+
+PARA EMPACOTAR CODIGO VC VAI EM MAVEN PACKGEM
+
+
+LINHA DE COMANDO
+rodrigo@alura:~Desktop/api$
+rodrigo@alura:~Desktop/api$
+rodrigo@alura:~Desktop/api$  ls  target/
+api-0.0.1-SNAPSHOT.jar           classes            generated-test-sources  maven-status      test-classes
+api-0.0.1-SNAPSHOT.jar.original  generated-sources  maven-archiver          surefire-reports
+rodrigo@alura:~Desktop/api$
+
+// Trecho suprimido
+
+rodrigo@alura:~Desktop/api$  ls  target/
+api-0.0.1-SNAPSHOT.jar           classes            generated-test-sources  maven-status      test-classes
+api-0.0.1-SNAPSHOT.jar.original  generated-sources  maven-archiver          surefire-reports
+rodrigo@alura:~Desktop/api$ java -version
+openjdk version "17.0.5" 2022-10-18
+OpenJDK Runtime Environment (build 17.0.5+8-Ubuntu-2ubuntu122.04, mixed mode, sharing)
+rodrigo@alura:~Desktop/api$
+
+java -jar target/api-0.0.1-SNAPSHOT.jar
+
+
+// Trecho suprimido
+
+rodrigo@alura:~Desktop/api$ java -version
+openjdk version "17.0.5" 2022-10-18
+OpenJDK Runtime Environment (build 17.0.5+8-Ubuntu-2ubuntu122.04, mixed mode, sharing)
+rodrigo@alura:~Desktop/api$ java -jar target/api-0.0.1-SNAPSHOT.jar
+
+
+para usar .proprite especifico
+rodrigo@alura:~/Desktop/api$ ^C
+rodrigo@alura:~/Desktop/api$ java -Dspring.profiles.active=prod -jar target/api-0.0.1-SNAPSHOT.jar
+
+
+para especificar qual urljdbc
+java -Dspring.profiles.active=prod -DDATASOURCE_URL=jdbc:mysql://localhost/vollmed_api -jar target/api-0.0.1-SNAPSHOT.jar
+
+
+java -Dspring.profiles.active=prod -DDATASOURCE_URL=jdbc:mysql://localhost/vollmed_api -jar target/api-0.0.1-SNAPSHOT.jar
+
+
+qual é senha etc
+java -Dspring.profiles.active=prod -DDATASOURCE_URL=jdbc:mysql://localhost/vollmed_api -DDATASOURCE_USERNAME=root -DDATASOURCE_PASSWORD=root -jar target/api-0.0.1-SNAPSHOT.jar
+
+
+
+
+
+
+diferentes tipo de empacotamento
+ Adicionar a tag <packaging>war</packaging> no arquivo pom.xml do projeto, devendo essa tag ser filha da tag raiz <project>:
+
+
+ <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
+     <groupId>org.springframework.boot</groupId>
+     <artifactId>spring-boot-starter-parent</artifactId>
+     <version>3.0.0</version>
+     <relativePath/> <!-- lookup parent from repository -->
+   </parent>
+   <groupId>med.voll</groupId>
+   <artifactId>api</artifactId>
+   <version>0.0.1-SNAPSHOT</version>
+   <name>api</name>
+
+   <packaging>war</
+
+
+
+
+
+
+   <dependency>
+     <groupId>org.springframework.boot</groupId>
+     <artifactId>spring-boot-starter-tomcat</artifactId>
+     <scope>provided</scope>
+   </dependency>
+
+
+@SpringBootApplication
+public class ApiApplication extends SpringBootServletInitializer {
+
+  @Override
+  protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+    return application.sources(ApiApplication.class);
+  }
+
+  public static void main(String[] args) {
+    SpringApplication.run(ApiApplication.class, args);
+  }
+
+}
 
 
 
