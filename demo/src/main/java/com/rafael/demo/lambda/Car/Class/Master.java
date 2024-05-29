@@ -50,7 +50,7 @@ public class Master {
         converter.converter(json, Models.class).models().forEach(System.out::println);
     }
 
-    private List<Model> type(String type) {
+    public List<Model> type(String type) {
         String json = iconsumption.getData("https://parallelum.com.br/fipe/api/v1/"+type.toLowerCase()+"/marcas");
         return converter.listDate(json, Model.class);
 

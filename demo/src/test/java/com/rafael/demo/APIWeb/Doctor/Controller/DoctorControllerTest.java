@@ -53,7 +53,6 @@ private ServiceDoutor doutor;
     void agenda() throws Exception {
       //  when(doutor.register(any())).thenReturn(new ListDoctor(1L,"Dsd","eqwe","adfa",Specialty.CARDIOLOGY));
        // when(doutor.register(any())).thenReturn(null);
-
         var response =  mvc.perform(post("/Doctor/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(dataDoctorjsonTest.write(
