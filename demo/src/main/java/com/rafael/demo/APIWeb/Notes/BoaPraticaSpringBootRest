@@ -679,3 +679,18 @@ public class ApiApplication extends SpringBootServletInitializer {
 
 
 
+
+
+
+
+
+
+
+
+
+LEMBRA NA HORA DO TESTE USAR BANCO EM MEMORIA
+
+
+
+
+
