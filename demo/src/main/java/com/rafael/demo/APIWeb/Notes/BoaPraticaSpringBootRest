@@ -211,6 +211,13 @@ private DadosEndereco dadosEndereco() {
 
 
 
+        verify(String,times(1)).toString()
+        then().should().toString()
+        veridica que essa class chamou esse tal metodos quantas vezes
+        when().thenReturn()
+        BDDMockito.given().willReturn()
+        pega esse metodo aqui e retorna tal coisa com ele
+
 
 
 @Test
