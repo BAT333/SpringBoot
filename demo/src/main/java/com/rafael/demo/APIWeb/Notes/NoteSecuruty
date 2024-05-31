@@ -216,3 +216,11 @@ CLASS SERCURITYCONFIGURTION
 
     .addFilterBefore(sercurityFilter, UsernamePasswordAuthenticationFilter.class)
     chama primeiro nosso filtro, depois qual filtro tem chamar, que filter da spring
+
+        HttpServletRequest request,-> pega coisa da requisição
+        HttpServletResponse response, -> manda coisa para requisição
+        FilterChain filterChain-> repeesenta cadeia de filtro
+
+
+
+

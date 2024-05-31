@@ -1,0 +1,26 @@
+ESSE BANCO DE DADOS CRAIDO POR JAVA
+ELE É INSTALADO NA APLICAÇÃO VIA MAVEN OU OUTRA VIA DEPENDENDO
+AS CONFIGURAÇÃO DELE PADRÃO
+SE SO PRECISA ADD NO APPPROERIES
+spring.datasource.driver-class-name=org.h2.Driver -> so isso resto é comfigurado automaticamente mas vc pode
+configura da forma que quiser
+
+spring.datasource.url=jdbc:h2:mem:db;DB_CLOSE_DELAY=-1
+
+
+para acessar o banco de dados h2 é online
+localhost:8080/h2-console
+
+
+------------------------------
+Spring Web
+Spring Security
+Lombok
+Spring Boot DevTools
+--------------------------------------
+banco-dados
+H2 Database
+validation
+Mysql Driver
+Spring Data JPA
+Flyway Migration
