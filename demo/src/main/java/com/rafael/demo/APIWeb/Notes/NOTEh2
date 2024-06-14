@@ -17,6 +17,7 @@ Spring Web
 Spring Security
 Lombok
 Spring Boot DevTools
+
 --------------------------------------
 banco-dados
 H2 Database
@@ -24,3 +25,10 @@ validation
 Mysql Driver
 Spring Data JPA
 Flyway Migration
+----------------------------
+microserviços
+openfeign
+EUREKA SERVE
+Eureka Discovery Client
+"Gateway - Spring Cloud Routing" e "Eureka Discovery Client - Spring Cloud Discovery".
+
