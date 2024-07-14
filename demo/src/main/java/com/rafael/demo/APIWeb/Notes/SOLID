@@ -1,0 +1,38 @@
+SOLID: Os primeiros 5 princípios do design orientado a objetos
+S - Princípio da responsabilidade única.
+O - Princípio aberto-fechado.
+L - Princípio da Substituição de Liskov.
+I - Princípio da Segregação de Interfaces.
+D - Princípio de Inversão de Dependência.
+
+
+
+
+
+
+SOLID: Os primeiros 5 princípios do design orientado a objetos
+S - Princípio da responsabilidade única.
+UMA CLASS SO TEM UM UNICA RESPOSABILIDADE NÃO MAIS QUE ISSO, UMA CLASS DE CONTROLLER TEM RESPOSNSABILIDADE DE CHAMAR
+METODOS HTTPS, NÃO FAZER LOGICA DE NEGOCIOS
+O - Princípio aberto-fechado.
+UMA CLASS PODE ESTA ABERTO PARA NOVAS MUDANÇAS MAS AO MESMO TEMPO FECHADA, UMA UNICA CLASS
+PODE FAZER DIFERENTES METODOS QUE SERIA ABERTO, MAS ELA TBM SE MANTEM FECHADAS PARA METODS NOVOS OU METODOS SEM PRECISÃO
+L - Princípio da Substituição de Liskov.
+UMA CLASS TODOS OS METODOS QUE EXITE NELA OU EXTENDES ELA TEM FUNCIONAR POR EXEMPLO
+VC TEM OBJETO QUE É PATO, PARECE UM PATO, NADA IGUAL PATO, FAZ TUDO IGUAL PATO, MAS PRECISA DE PILHA PARA FUNCIONAR
+MESMA COISA SE TEM OBJETO QUE PRECISA DE OUTRO PARA FUNCIONAR ISSO JA É UM ERRO
+I - Princípio da Segregação de Interfaces.
+NEM UMA CLASS PRECISA ULTILIZAR METODOS OU ATRIBUTOS QUE NÃO ULTILIZA,
+VAMOS FALAR EXEMPLO DE BIBLIOTECA, TEM LIVROS, REVISTA, EBOOK
+AI ELA PRECISA DO METODO LER, PAGINA, AUTOR, QUEM ESCREVEU
+AI LIVRO SO LER E PAGINA E EMPRESA QUE ESCREVEU
+AI TUDO ESTENDE DE UMA CLASSE SO, NÃO PRECISA DE TODOS ESSE METODOS QUE EXTENDE
+D - Princípio de Inversão de Dependência.
+
+primeiro diz que classe da alto nivel não deve depender de classe de baixos nivel
+class de baixo nivel class que não depende de ninguem para existir
+alto nivel class que depende de alguem para exitir  ou outras class de baico nivel
+mas sim depender de abstração deles por exemplo interfaces abstract etc,
+
+segundo segundo as interface não deve depnder de detalhes, tipo outras class de baixo nivel etc, mas sim
+deve depender de outra class, ou seja tudo tem ter interface
