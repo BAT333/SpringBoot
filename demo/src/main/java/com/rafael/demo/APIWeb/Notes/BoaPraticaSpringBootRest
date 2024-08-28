@@ -131,6 +131,15 @@ aqui dizendo precisa deste recrerimento
 
        aqui vc pode add nas configuração e junto com componete isso vai add infos extras para sua documentação
 
+
+       documentação em forma de json
+       	<dependency>
+       			<groupId>org.springdoc</groupId>
+       			<artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+       			<version>2.5.0</version>
+       		</dependency>
+       		/api-docs
+
 -------------------------------------------------------------------------------------------------------------------------------------
 teste
 teste automatizado com junit,mockito,hamcrest,assertJ
