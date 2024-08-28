@@ -117,6 +117,20 @@ aqui dizendo precisa deste recrerimento
 
    authorize.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll();
    lembra do spring config libera essas url
+
+
+
+     .info(
+                      new Info().title("Auth service api")
+                              .description("THIS PART OF THE API VALIDATES WHO CAN ACCESS AND WHAT THEY CAN ACCESS")
+                              .version("v0.0.1")
+                   )
+                   .externalDocs(new ExternalDocumentation()
+                           .description("")
+                       .url(""))
+
+       aqui vc pode add nas configuração e junto com componete isso vai add infos extras para sua documentação
+
 -------------------------------------------------------------------------------------------------------------------------------------
 teste
 teste automatizado com junit,mockito,hamcrest,assertJ
